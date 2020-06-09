@@ -5,7 +5,7 @@ Contents
     2. [Docker](INSTALLATION.md#Docker)
     3. [Minikube](INSTALLATION.md#Docker)
 2. [Making a Local Cluster](LOCALCLUSTER.md)
-    1. [Building the Cluster](LOCALCLUSTER.md#Creating-a-cluster)
+    1. [Building the Cluster](LOCALCLUSTER.md#Creating-a-Cluster)
     2. [Deployments](LOCALCLUSTER.md#Deployments)
     3. [Pods and Nodes](LOCALCLUSTER.md#Pods-and-Nodes)
     4. [Services](LOCALCLUSTER.md#Services)
