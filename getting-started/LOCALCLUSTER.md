@@ -262,7 +262,85 @@ $ kubectl exec -ti $POD_NAME curl localhost:8080
 ```
 To shutdown the application, you would need to delete the Deployment.
 
+Relevant [link to Kubernetes official tutorial](https://kubernetes.io/docs/tutorials/kubernetes-basics/expose/expose-intro/)
+
 [top](LOCALCLUSTER.md#Table-of-Contents)
 
 Scaling
 =====
+So far we've had only one Pod. One Pod may not be able to handle all the traffic the application needs. We can scale the number of Pods allocated for a Deployment up or down by creating or deleting replicas. Visually, this looks like moving between the two following images
+
+![1 replica](https://d33wubrfki0l68.cloudfront.net/043eb67914e9474e30a303553d5a4c6c7301f378/0d8f6/docs/tutorials/kubernetes-basics/public/images/module_05_scaling1.svg)
+![Many replicas](https://d33wubrfki0l68.cloudfront.net/30f75140a581110443397192d70a4cdb37df7bfc/b5f56/docs/tutorials/kubernetes-basics/public/images/module_05_scaling2.svg)
+
+Deployments can be [autoscaled](https://kubernetes.io/docs/user-guide/horizontal-pod-autoscaling/) or even scaled to zero.
+
+When we have multiple replicas of an application, Services balance the load between all available pods. 
+
+We can look at how many replicas a Deployment has by running
+```
+$ kubectl get rs
+```
+Where `rs` stands for `ReplicaSet`. Intuitively, `DESIRED` shows how many replicas you want and `CURRENT` is how many are running.
+
+We can scale the number of replicas with `kubectl scale` followed by the deployment and the number of instances.
+
+To watch this happen, you can add the `-w` option to `get deployments` and run that right immediately after like so:
+```
+$ kubectl scale deployments/kubernetes-bootcamp --replicas=4 && \
+    kubectl get deployments -w
+```
+
+This should show the replicas as they are produced. Use `Ctrl+C` to stop watching.
+
+If we run `curl $(minikube ip):$NODE_PORT` repeatedly, we will get different Pods occassionally, demonstrating the load balancing.
+
+By scaling nodes back, we can see them terminate. Try
+```
+$ kubectl scale deployments/kubernetes-bootcamp --replicas=2
+$ kubectl get pods
+```
+Wait for ~10-20 seconds and check the pods again. They should go from Terminating to no longer showing up.
+
+One advantage of scaling is the ability to apply updates without any downtime. We'll see this in the next section.
+
+Relevant [link to Kubernetes official tutorial](https://kubernetes.io/docs/tutorials/kubernetes-basics/scale/scale-intro/)
+[top](LOCALCLUSTER.md#Table-of-Contents)
+
+Updates
+-----
+Kubernetes allows for **rolling updates** when you have multiple Pod instances. By default, Kubernetes only takes down and adds Pods one at a time, but this can be configured to numbers of percentages of Pods.
+
+Furthermore, Kubernetes versions updates so they can be easily reverted if broken.
+
+The process for updating looks like the following series of images
+![1](https://d33wubrfki0l68.cloudfront.net/30f75140a581110443397192d70a4cdb37df7bfc/fa906/docs/tutorials/kubernetes-basics/public/images/module_06_rollingupdates1.svg)
+![2](https://d33wubrfki0l68.cloudfront.net/678bcc3281bfcc588e87c73ffdc73c7a8380aca9/703a2/docs/tutorials/kubernetes-basics/public/images/module_06_rollingupdates2.svg)
+![2](https://d33wubrfki0l68.cloudfront.net/9b57c000ea41aca21842da9e1d596cf22f1b9561/91786/docs/tutorials/kubernetes-basics/public/images/module_06_rollingupdates3.svg)
+![3](https://d33wubrfki0l68.cloudfront.net/6d8bc1ebb4dc67051242bc828d3ae849dbeedb93/fbfa8/docs/tutorials/kubernetes-basics/public/images/module_06_rollingupdates4.svg)
+
+As you would expect, the Service load-balances appropriately when Pods are updating
+
+Use `describe pods` and look at the image field for the version number. Then run
+```
+$ kubectl set image deployments/kubernetes-bootcamp kubernetes-bootcamp=jocatalin/kubernetes-bootcamp:v2
+```
+Watch the pods as they update
+
+Now, if we check `curl $(minikube ip):$NODE_PORT` we should see the Pods it hits are running `v2`, which can be confirmed with
+```
+$ kubectl rollout status deployments/kubernetes-bootcamp
+```
+And by looking at the image field in `describe pods`.
+
+If instead, we update to
+```
+$ kubectl set image deployments/kubernetes-bootcamp kubernetes-bootcamp=gcr.io/google-samples/kubernetes-bootcamp/v10
+```
+And watch the deployments... it gets stuck. `describe pods` shows us that in the updated Pods, the image didn't pull succesfully. This can be undone with
+```
+$ kubectl rollout undo deployments/kubernetes-bootcamp
+```
+Checking back on the pods using `get` and `describe` will show that the rollback was successful.
+
+These are the basics of getting started with Kubernetes. In the following guides, we'll ddiscuss running Kubernetes on the cloud and integration with MPI
