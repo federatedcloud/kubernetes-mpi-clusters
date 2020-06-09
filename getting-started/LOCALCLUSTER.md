@@ -1,6 +1,6 @@
 Table of Contents
 -----
- * [Running a Simple Container](LOCALCLUSTER.md#Running-a-Simple-Cluster)
+ * [Running a Simple Cluster](LOCALCLUSTER.md#Running-a-Simple-Cluster)
  1. [Creating a Cluster](LOCALCLUSER.md#Creating-a-Cluster)
  2. [Deployments](LOCALCLUSTER.md#Deployments)
  3. [Pods and Nodes](LOCALCLUSTER.md#Pods-and-Nodes)
@@ -8,6 +8,7 @@ Table of Contents
  5. [Scaling](LOCALCLUSTER.md#Scaling)
 
 [back to README](README.md)
+
 Running a Simple Cluster
 =====
 Kubernetes has a ton of utility for managing and deploying clusters. This guide will rely heavily on the interactive guide [here](https://kubernetes.io/docs/tutorials/kubernetes-basics/), with a few modifications and slightly less detail. While it is recommended to read through the information there, it isn't neccessary for getting started, and the interactive session isn't 100% compatible with the latest version of Minikube.
@@ -15,6 +16,7 @@ Kubernetes has a ton of utility for managing and deploying clusters. This guide 
 The guide is broken down into sections that each introduce a new concept about Kubernetes, building off each other. If you want to go away at any point, it may be good to run `minikube stop` and `minikube start` when you come back.
 
 [top](LOCALCLUSTER.md#Table-of-Contents)
+
 Creating a Cluster
 -----
 Kubernetes abstracts the idea of containerized applications running on a network of machines such that the user doesn't have to manually set up every single interactions between machines, but rather "**automate the distribution and scheduling of application containers across a cluster in a more efficient way**"
@@ -56,6 +58,7 @@ You have now created a working cluster! Now we'll look at what Kubernetes lets u
 relevant link [here](https://kubernetes.io/docs/tutorials/kubernetes-basics/create-cluster/cluster-intro/)
 
 [top](LOCALCLUSTER.md#Table-of-Contents)
+
 Deployments
 -----
 To run applications with Kubernetes, you use a **Deployment**. This is a configuration that tells Kubernetes how to create and update instances of the application. If a Node running the application goes down, the Kubernetes Deployment Controller will notice and replace it with another instance on another Node.
@@ -94,6 +97,7 @@ In the next section, this proxy will be more useful, as we'll be interacting wit
 The corresponding part of the Kubernetes tutorial is found [here](https://kubernetes.io/docs/tutorials/kubernetes-basics/deploy-app/deploy-intro/)
 
 [top](LOCALCLUSTER.md#Table-of-Contents)
+
 Pods and Nodes
 =====
 Pods are the logical unit of Kubernetes. Each Pod is constructed to run a suite of tightly coupled containers. This is facilitated by the ability to provide shared resources for all containers within a Pod, such as
@@ -166,6 +170,7 @@ That's it concerning Pods and containers for now, next we'll be looking at Servi
 Relevant [link to Kubernetes official tutorial](https://kubernetes.io/docs/tutorials/kubernetes-basics/explore/explore-intro/)
 
 [top](LOCALCLUSTER.md#Table-of-Contents)
+
 Services
 =====
 Pods regularly 'die' and are rebuilt. When this happens, new Pods are created to restore the cluster. However, each Pod has a unique IP address, so we need a way to identify Pods by what they do instead of what they are.
@@ -258,5 +263,6 @@ $ kubectl exec -ti $POD_NAME curl localhost:8080
 To shutdown the application, you would need to delete the Deployment.
 
 [top](LOCALCLUSTER.md#Table-of-Contents)
+
 Scaling
 =====
