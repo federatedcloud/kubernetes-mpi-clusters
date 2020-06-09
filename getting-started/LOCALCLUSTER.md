@@ -46,7 +46,7 @@ relevant link [here](https://kubernetes.io/docs/tutorials/kubernetes-basics/crea
 
 Deployments
 -----
-To run applications with Kubernetes, you use a **Deployment**. This is a configuration that tells Kubernetes how to create and update instances of the application. If a node running the application goes down, the Kubernetes Deployment Controller will notice and replace it with another instance on another node.
+To run applications with Kubernetes, you use a **Deployment**. This is a configuration that tells Kubernetes how to create and update instances of the application. If a Node running the application goes down, the Kubernetes Deployment Controller will notice and replace it with another instance on another Node.
 
 We can now add detail to our broad view of the cluster by including deployments:
 ![Deployment Cluster](https://d33wubrfki0l68.cloudfront.net/152c845f25df8e69dd24dd7b0836a289747e258a/4a1d2/docs/tutorials/kubernetes-basics/public/images/module_02_first_app.svg)
@@ -58,9 +58,9 @@ Unsurprisingly, kubectl is how we'll interact with the cluster to build the depl
 $ kubectl create deployment kubernetes-bootcamp --image=gcr.io/google-samples/kubernetes-bootcamp:v1
 ```
 This command had three main effects
- * Searched for a node where the application could run
- * Scheduled the application to run on that node
- * Configured the cluster to reschdule the instance on a new node when needed
+ * Searched for a Node where the application could run
+ * Scheduled the application to run on that Node
+ * Configured the cluster to reschdule the instance on a new Node when needed
 
 Just like how we could list our nodes with `kubectl get nodes`, we can list deployments with
 ```
@@ -77,8 +77,37 @@ To see that you can interact, try running
 $ curl http://localhost:8001/version
 ```
 
+In the next section, this proxy will be more useful, as we'll be interacting with containers we're running directly.
+
+The corresponding part of the Kubernetes tutorial is found [here](https://kubernetes.io/docs/tutorials/kubernetes-basics/deploy-app/deploy-intro/)
+
+Pods and Nodes
+=====
+Pods are the logical unit of Kubernetes. Each Pod is constructed to run a suite of tightly coupled containers. This is facilitated by the ability to provide shared resources for all containers within a Pod, such as
+ * Shared storage (i.e. Volumes)
+ * Networking with a unique cluster IP address
+ * The 'big picture' of the Pod, including the container images and ports to use
+
+In the last section, we made a Deployment. What happened behind the scenes was Kubernetes created a Pod running a container built from the image we provided.
+
+Previously, we mentioned that Deployments can make process run on different Nodes if something crashes. Specifically, the entire Pod will be recreated identically on a separate node.
+
+The following image shows levels of increasing complixity with Pods
+![Pods](https://d33wubrfki0l68.cloudfront.net/fe03f68d8ede9815184852ca2a4fd30325e5d15a/98064/docs/tutorials/kubernetes-basics/public/images/module_03_pods.svg)
+
+An individual Node can be running any number of Pods. The Master will assign Pods to Nodes such that the Load on each node is balanced.
+
+When we add pods into our diagram, we get the following:
+![Node with Pods](https://d33wubrfki0l68.cloudfront.net/5cb72d407cbe2755e581b6de757e0d81760d5b86/a9df9/docs/tutorials/kubernetes-basics/public/images/module_03_nodes.svg)
+
+Just like we could use `kubectl get pods` to see some basic information about our Pods, running `kubectl describe pods` will provide a detailed suite of information including
+ * The IP address where we can access it
+ * Any labels it has (more on that next!)
+ * The image it's running
+ * A log of events referring to that Pod
+
 It's possible to access specific pieces of information about the cluster by running `kubectl get <resource> -o <template-style>` For this guide, we use `go-template`, but there may be better options.
-To get the pod name, run
+To get the Pod name, run
 ```
 export POD_NAME=$(kubectl get pods -o go-template --template '{{range.items}}{{.metadata.name}}{{"\n"}}{{end}}')
 ```
@@ -90,64 +119,129 @@ to the corresponding entry in
 ```
 kubectl get pods
 ```
-The corresponding part of the Kubernetes tutorial is found [here](https://kubernetes.io/docs/tutorials/kubernetes-basics/deploy-app/deploy-intro/)
 
-Pods and Nodes
-=====
-Pods are the logical unit of Kubernetes. Each pod is constructed to run a suite of tightly coupled container. This is facilitated by the ability to provide shared resources for all containers within a pod, such as
- * Shared storage (i.e. Volumes)
- * Networking with a unique cluster IP address
- * The 'big picture' of the pod, including the container images and ports to use
-
-In the last section, we made a Deployment. What happened behind the scenes was Kubernetes created a pod running a container built from the image we provided.
-
-Previously, we mentioned that Deployments can make process run on different nodes if something crashes. Specifically, the entire pod will be recreated identically on a separate node.
-
-The following image shows levels of increasing complixity with pods
-![Pods](https://d33wubrfki0l68.cloudfront.net/fe03f68d8ede9815184852ca2a4fd30325e5d15a/98064/docs/tutorials/kubernetes-basics/public/images/module_03_pods.svg)
-
-An individual node can be running any number of pods. The Master will assign pods to nodes such that the load on each node is balanced.
-
-When we add pods into our diagram, we get the following:
-![Node with Pods](https://d33wubrfki0l68.cloudfront.net/5cb72d407cbe2755e581b6de757e0d81760d5b86/a9df9/docs/tutorials/kubernetes-basics/public/images/module_03_nodes.svg)
-
-Just like we could use `kubectl get pods` to see some basic information about our pods, running `kubectl describe pods` will provide a detailed suite of information including
- * The IP address where we can access it
- * Any labels it has (more on that next!)
- * The image it's running
- * A log of events referring to that pod
-
-We can isolate the log by running
+Now that we have the Pod name, we can easily isolate the log by running
 ```
 $ kubectl logs $POD_NAME
 ```
-If our pod had multiple containers, we would need to specify which container we're looking at. by writing `-c <container-name>` after the name of the pod. By default it uses the first container in the pod.
+If our Pod had multiple containers, we would need to specify which container we're looking at. by writing `-c <container-name>` after the name of the pod. By default it uses the first container in the Pod.
 
-It's possible to interact directly with the pod with the `exec` command. Try running
+It's possible to interact directly with the container inside our pod with `exec`. Try
 ```
 $ kubectl exec $POD_NAME -- env
 ```
-to see a list of environment variables in the pod.
+to see a list of environment variables in the container.
 The same way of specifying which container we're interacting with applies here.
 
-We can even run bash on this pod, as it's included in the container! To do this, we need to allow the pod to receive information from stdin with `-i` and make the formatting nice with `-t`, hence
+We can even run bash on this container! To do this, we need to allow the Pod to receive information from stdin with `-i` and make the formatting nice with `-t`, hence
 ```
 $ kubectl exec -ti $POD_NAME -- bash
 ```
 
-Now that we're inside the pod, we can interact directly with our application. Try
+Now that we're inside the container, we can interact directly with our application. Try
 ```
 cat server.js
 ```
 to see the code we're running.
-While we're inside the container, we can look at the server by running
+Also, we can look at the server by running
 ```
 curl localhost:8080
 ```
 
-That's it concerning pods and containers for now, next we'll be looking at services.
+That's it concerning Pods and containers for now, next we'll be looking at Services.
 
 Relevant [link to Kubernetes official tutorial](https://kubernetes.io/docs/tutorials/kubernetes-basics/explore/explore-intro/)
 
 Services
+=====
+Pods regularly 'die' and are rebuilt. When this happens, new Pods are created to restore the cluster. However, each Pod has a unique IP address, so we need a way to identify Pods by what they do instead of what they are.
+
+For this, we introduce **Services**, which are an abstraction defining a logical set of pods and how to access them. It is usually defined with YAML, but can be written with JSON as well. For instance, interacting with a pod from outside the cluster requires a Service. Services can come in different types depending on what they are meant for.
+ * _ClusterIP_ (default) - The Service is only reachable from within the cluster on a fixed IP
+ * _NodePort_ - Exposes the Service on the same port of each selected Node. Accessible with `<NodeIP>:<NodePort>`
+ * _LoadBalancer_ - Creates an external load balancer in the current cloud and assigns a fixed, external IP to the Service.
+
+See [Using Source IP](https://kubernetes.io/docs/tutorials/services/source-ip/) and [Connecting Applications with Services](https://kubernetes.io/docs/concepts/services-networking/connect-applications-service).
+
+In order to group the Pods a Service acts on, we use **Labels**, which can
+ * Designate objects for development, test, and production
+ * Embed version tags
+ * Classify an object using tags
+
+Now that we can group resources, Services can use a LabelSelector to define which Pods are under their jurisdiction.
+
+Labels can be applied either when resources are created or while they are running.
+
+Start by looking at the services currently running with
+```
+$ kubectl get services
+```
+The only service running should be kubernetes managing the entire cluster.
+
+We can make a new Service with `expose` as follows
+```
+$ kubectl expose deployment/kubernetes-bootcamp --type="NodePort" --port 8080
+```
+Check that this is running and note the port it's using. Compare this to
+```
+$ kubectl describe services
+```
+Under Port(S) in the output of `get services`, you should see `8080:<Port>/TCP` and from `describe services` under `NodePort` you should see the same value as `<Port>/TCP`
+
+We can add this port to our environment with the command
+```
+$ export NODE_PORT=$(kubectl get services/kubernetes-bootcamp -o go-template='{{(index .spec.ports 0).nodePort}}')
+```
+Check that `echo $NODE_PORT` gives the same number as before
+
+Then running
+```
+$ curl $(minikube ip):$NODE_PORT
+```
+confirms that the Service is exposed.
+
+When we added this Pod to the Service, it got the Label `app=kubernetes-bootcamp` which you can find by running `describe` in anything related to the Service. Confirm this by running
+```
+$ kubectl describe services
+```
+
+We can use this Label to filter the commands we run. Try it with
+```
+$ kubectl get services -l app=kubernetes-bootcamp
+```
+Note that now, only the one service with this filter shows up.
+
+We can add our own tags with `label`, for instance
+```
+kubectl label pod $POD_NAME version=v1
+```
+As before, we can see this Label when we run
+```
+$ kubectl describe pods $POD_NAME
+```
+And again,
+```
+kubectl get pods -l version=v1
+```
+will give the only pod we have. If you try a different value for the `version` label in the filter, nothing will show up.
+
+We can delete a service with `delete service` after providing a Label. Try
+```
+$ kubectl delete service -l app=kubernetes-bootcamp
+```
+And check that it is gone
+```
+$ kubectl get services
+$ curl $(minikube ip):NODE_PORT
+```
+
+Note that the app is still running. Think about how you would check that this is the case given the tools we have.
+
+One option is to run
+```
+$ kubectl exec -ti $POD_NAME curl localhost:8080
+```
+To shutdown the application, you would need to delete the Deployment.
+
+Scaling
 =====
