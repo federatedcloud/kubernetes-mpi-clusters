@@ -10,6 +10,7 @@ Contents
     3. [Pods and Nodes](LOCALCLUSTER.md#Pods-and-Nodes)
     4. [Services](LOCALCLUSTER.md#Services)
     5. [Scaling](LOCALCLUSTER.md#Scaling)
+    6. [Updates](LOCALCLUSTER.md#Updates)
 
 Overview
 =====

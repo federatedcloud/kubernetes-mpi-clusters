@@ -6,6 +6,7 @@ Table of Contents
  3. [Pods and Nodes](LOCALCLUSTER.md#Pods-and-Nodes)
  4. [Services](LOCALCLUSTER.md#Services)
  5. [Scaling](LOCALCLUSTER.md#Scaling)
+ 6. [Updates](LOCALCLUSTER.md#Updates)
 
 [back to README](README.md)
 
@@ -344,3 +345,7 @@ $ kubectl rollout undo deployments/kubernetes-bootcamp
 Checking back on the pods using `get` and `describe` will show that the rollback was successful.
 
 These are the basics of getting started with Kubernetes. In the following guides, we'll ddiscuss running Kubernetes on the cloud and integration with MPI
+
+Relevant [link to Kubernetes official tutorial](https://kubernetes.io/docs/tutorials/kubernetes-basics/update/update-intro/)
+
+[top](LOCALCLUSTER.md#Table-of-Contents)
