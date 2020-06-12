@@ -41,3 +41,27 @@ List of Issues with `kube-openmpi` so far
      ```
  - Only appears to provide support for Ubuntu 16.04 applications
  - Requires applications be built using `everpeace/kube-openmpi` as a base image
+
+MPI-Operator
+============
+Current progress:
+ - Found [github repo](https://github.com/kubeflow/mpi-operator), downloaded with git clone
+ - Created mpi-operator with `deploy/v1alpha2/mpi-operator.yaml`
+ - Confirmed it is running with `kubectl get crd`
+ - Tried running an example from `examples/horovod`
+   - Built docker container with `docker build -t horovod:latest -f Dockerfile.cpu`
+     - Took about 20-30 mins to build
+   - Ran `kubectl create -f ./tensorflow-mnist.yaml`
+   - Job never ran, nodes didn't finish building
+   - Building `mpi-operator` created a `mpi-operator` namespace, so tried `kubectl create -n mpi-operator -f ./tensorflow-mnist.yaml`. Didn't work either
+   - Noticed cpu, memory, demands were very large so I modified the `minikube config` to account
+   - Even with increased resources, still didn't run
+
+Next steps:
+ - Try other examples?
+ - Look at other troubleshooting strategies
+ - Read through `issues` page on repo in more detail
+ - Reach out to other people working with mpi & kubernetes?
+ - ...
+ - Figure out how to run our own mpi code
+   - Looks confusing, but not too confusing.
