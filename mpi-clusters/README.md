@@ -19,11 +19,12 @@ $ ./get_helm.sh
 or find a stable release by following the instructions [here](https://helm.sh/docs/intro/install/)
 
 Also it may be good to start using a public cloud service. As Kubernetes was developed by Google, this guide will show you how to set up a GCP account. Note that they often provide $300 of cloud credits when you create an account which is easily enough to get started. More on that [here](PUBLICCLOUD.md)
+
 Kube-openmpi
 ============
 Repository is [here](https://github.com/everpeace/kube-openmpi/tree/master/chainermn-example)
 
-Trying to run the example code raisd numerous issues. See the following list compiled while trying to make it work.
+Trying to run the example code raised numerous issues. See the following list compiled while trying to make it work.
 
 List of Issues with `kube-openmpi` so far
  - Likely not useful long-term (appears to be depracated)
