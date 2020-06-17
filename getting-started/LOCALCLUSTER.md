@@ -35,7 +35,7 @@ The simplest division of labor in a Kubernetes cluster is the two roles that kub
 
 The broadest overview of a Kubernetes cluster is something like this:
 ![Kubernetes cluster](https://d33wubrfki0l68.cloudfront.net/99d9808dcbf2880a996ed50d308a186b5900cec9/40b94/docs/tutorials/kubernetes-basics/public/images/module_01_cluster.svg)
-(Image source: [Kubernetes Tutorial](https://kubernetes.io/docs/tutorials/kubernetes-basics/create-cluster/cluster-intro/)
+(Image source: [Kubernetes Tutorial](https://kubernetes.io/docs/tutorials/kubernetes-basics/create-cluster/cluster-intro/))
 
 In this tutorial, your machine will act as a master node, and Minikube will create a VM on your machine that contains a cluster with one node.
 
@@ -67,7 +67,7 @@ To run applications with Kubernetes, you use a **Deployment**. This is a configu
 
 We can now add detail to our broad view of the cluster by including deployments:
 ![Deployment Cluster](https://d33wubrfki0l68.cloudfront.net/152c845f25df8e69dd24dd7b0836a289747e258a/4a1d2/docs/tutorials/kubernetes-basics/public/images/module_02_first_app.svg)
-(Image Source: [Kubernetes Tutorial](https://kubernetes.io/docs/tutorials/kubernetes-basics/deploy-app/deploy-intro/)
+(Image Source: [Kubernetes Tutorial](https://kubernetes.io/docs/tutorials/kubernetes-basics/deploy-app/deploy-intro/))
 
 For this tutorial, the application to run will be writen in Node.js and packaged with Docker.
 
@@ -119,7 +119,7 @@ An individual Node can be running any number of Pods. The Master will assign Pod
 
 When we add pods into our diagram, we get the following:
 ![Node with Pods](https://d33wubrfki0l68.cloudfront.net/5cb72d407cbe2755e581b6de757e0d81760d5b86/a9df9/docs/tutorials/kubernetes-basics/public/images/module_03_nodes.svg)
-(Both Images from [Kubernetes Tutorial](https://kubernetes.io/docs/tutorials/kubernetes-basics/explore/explore-intro/)
+(Both Images from [Kubernetes Tutorial](https://kubernetes.io/docs/tutorials/kubernetes-basics/explore/explore-intro/))
 
 Just like we could use `kubectl get pods` to see some basic information about our Pods, running `kubectl describe pods` will provide a detailed suite of information including
  * The IP address where we can access it
@@ -276,7 +276,7 @@ So far we've had only one Pod. One Pod may not be able to handle all the traffic
 
 ![1 replica](https://d33wubrfki0l68.cloudfront.net/043eb67914e9474e30a303553d5a4c6c7301f378/0d8f6/docs/tutorials/kubernetes-basics/public/images/module_05_scaling1.svg)
 ![Many replicas](https://d33wubrfki0l68.cloudfront.net/30f75140a581110443397192d70a4cdb37df7bfc/b5f56/docs/tutorials/kubernetes-basics/public/images/module_05_scaling2.svg)
-(Both images from [Kubernetes Tutorial](https://kubernetes.io/docs/tutorials/kubernetes-basics/scale/scale-intro/)
+(Both images from [Kubernetes Tutorial](https://kubernetes.io/docs/tutorials/kubernetes-basics/scale/scale-intro/))
 
 Deployments can be [autoscaled](https://kubernetes.io/docs/user-guide/horizontal-pod-autoscaling/) or even scaled to zero.
 
@@ -323,7 +323,7 @@ The process for updating looks like the following series of images
 ![2](https://d33wubrfki0l68.cloudfront.net/678bcc3281bfcc588e87c73ffdc73c7a8380aca9/703a2/docs/tutorials/kubernetes-basics/public/images/module_06_rollingupdates2.svg)
 ![2](https://d33wubrfki0l68.cloudfront.net/9b57c000ea41aca21842da9e1d596cf22f1b9561/91786/docs/tutorials/kubernetes-basics/public/images/module_06_rollingupdates3.svg)
 ![3](https://d33wubrfki0l68.cloudfront.net/6d8bc1ebb4dc67051242bc828d3ae849dbeedb93/fbfa8/docs/tutorials/kubernetes-basics/public/images/module_06_rollingupdates4.svg)
-(All images from [Kubernetes Tutorial](https://kubernetes.io/docs/tutorials/kubernetes-basics/update/update-intro/)
+(All images from [Kubernetes Tutorial](https://kubernetes.io/docs/tutorials/kubernetes-basics/update/update-intro/))
 
 As you would expect, the Service load-balances appropriately when Pods are updating
 
