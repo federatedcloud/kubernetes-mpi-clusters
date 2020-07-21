@@ -5,8 +5,8 @@
 *.tfstate
 *.tfstate.*
 
-# Crash log files
-crash.log
+# Crash, dev log files
+*.log
 
 # Ignore any .tfvars files that are generated automatically for each Terraform run. Most
 # .tfvars files are managed as part of configuration and so should be included in
@@ -27,3 +27,12 @@ override.tf.json
 
 # Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
 # example: *tfplan*
+
+# Ignore google credentials
+*.json
+
+# Ignore terraform pieces
+.terraform
+terraform.tfstate
+terraform.tfstate.backup
+
