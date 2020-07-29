@@ -14,13 +14,26 @@ One way of running mpi jobs is "manually" with Terraform and Ansible. Here's a b
 
 MPI Clusters with Terraform/Kubernetes
 --------------------------------------
-Alternatively, we can use a Terraform/Kubernetes deployment. Currently, this relies on cutting edge tools including terraform's beta google provider and alpha kubernetes provider, as well as mpi-operator, a tool currently in development as part of Kubeflow. The current process is described below, and can be replicated with `source build.sh` provided that you are logged into your GCP account with gcloud and have the necessary IAM roles.
+Alternatively, we can use a Terraform/Kubernetes deployment. Currently, this relies on cutting edge tools including terraform 0.13 RC-1 (binary provided), google-beta provider, kubernetes-alpha provider (binary provided, available [here](https://github.com/hashicorp/terraform-provider-kubernetes-alpha/releases/tag/v0.1.0)) as well as mpi-operator, a tool currently in development as part of Kubeflow.
 
-1. Terraform provisions a GCP VPC network and subnetwork for the cluster to operate on
-2. Terraform creates a cluster and non-default node pool running kubernetes 1.17+ (required for alpha kubernetes provider)
-3. gcloud connects kubernetes to the cluster, which in turn allows terraform to deploy resources to it.
-4. Due to required server-side planning with the alpha kubernetes provider, [staging.tf](staging.tf) is copied to the work directory and the `mpi-operator` namespace is created.
-5. The [mpi-operator.tf](./staging/mpi-operator.tf), the file describing the service account, cluster role, and cluster role binding are copied to the work directory and the corresponding resources are created.
-6. Finally, the `mpijob` custom resource and the `mpi-operator` deployment are brought into the work directory via [mpijob_crd.tf](./staging/mpijob_crd.tf) and created.
+In order to use this tool, you'll need to set a few configuration options and provide the necessary credentials first. Everything you need to do is detailed below
+- Create a google service account and place the credentials in [tf-kubernetes](tf-kubernetes).
+- Give the service account permissions to use cluster role bindings (Kubernetes Admin is sufficient, container.clusterRoleBindings.\* roles are necessary.
+- Set each variable in [terraform.tfvars](tf-kubernetes/terraform.tfvars). Refer to [variables.tf](tf-kubernetes/variables.tf) for the complete list and descriptions.
+- Customize [HPL.dat](tf-kubernetes/HPL.dat).
+- Update [hpl-benchmarks.tf](tf-kubernetes/staging/hpl-benchmarks.tf) accordingly.
 
-This is currently a work in progress. Next steps include moving this setup into a Docker (Nix) setup and testing it with HPL benchmarks.
+Running `build.sh` causes the following to happen:
+1. A Docker image is created, copying everything necessary to run terraform and installing kubectl and gcloud.
+2. A container is created from the image, which will run [run.sh](nix/run.sh)
+3. Terraform provisions a GCP VPC network and subnetwork for the cluster to operate on
+4. Terraform creates a cluster and non-default node pool running kubernetes 1.17+ (required for alpha kubernetes provider)
+5. gcloud connects kubernetes to the cluster, which in turn allows terraform to deploy resources to it.
+6. Due to required server-side planning with the alpha kubernetes provider, [namespace.tf](tf-kubernetes/staging/namespace.tf) is copied to the work directory and the `mpi-operator` namespace is created.
+7. [mpi-operator.tf](tf-kubernetes/staging/mpi-operator.tf), the file describing the service account, cluster role, and cluster role binding is copied to the work directory and the corresponding resources are created.
+8. Next, the `mpijob` custom resource and the `mpi-operator` deployment are brought into the work directory via [mpijob_crd.tf](tf-kubernetes/staging/mpijob_crd.tf) and created.
+8. The [hpl-benchmarks.tf](tf-kubernetes/staging/hpl-benchmarks.tf) file contains the MPIJob, which is the last resource added.
+9. The container sleeps for two minutes to allow the nodes to build, and then copies [HPL.dat](tf-kubernetes/HPL.dat) to the head worker node, which is sleeping to wait for the file.
+10. mpi-operator executes the runscript given in [hpl-benchmarks.tf](tf-kubernetes/staging/hpl-benchmarks.tf), and the results are automatically placed in the logs of the launcher node.
+11. Those logs are copied to the container, and then locally to hpl-results.txt
+
