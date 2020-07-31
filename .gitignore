@@ -32,7 +32,6 @@ override.tf.json
 *.json
 
 # Ignore terraform pieces
-.terraform
 terraform.tfstate
 terraform.tfstate.backup
 
