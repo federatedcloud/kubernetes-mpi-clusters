@@ -1,6 +1,6 @@
 # Local .terraform directories
 **/.terraform/*
-
+!/mpi-clusters/terraform/tf-kubernetes/.terraform/
 # .tfstate files
 *.tfstate
 *.tfstate.*
@@ -30,8 +30,3 @@ override.tf.json
 
 # Ignore google credentials
 *.json
-
-# Ignore terraform pieces
-terraform.tfstate
-terraform.tfstate.backup
-
