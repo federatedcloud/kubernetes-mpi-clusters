@@ -1,4 +1,5 @@
 #!/bin/bash
+RUNNAME=$1
 ## Append testing for uncommitted changes
 git_image_tag()
 {
@@ -26,4 +27,4 @@ docker rm -f tf_kubernetes_container
 docker run --name tf_kubernetes_container $NIX_K8_TF_IMAGE sleep 10000 &
 sleep 5
 docker exec -t tf_kubernetes_container nix-shell /home/nixuser/nix --run "/home/nixuser/nix/run.sh"
-docker cp tf_kubernetes_container:/home/nixuser/results.txt hpl-results.txt
+docker cp tf_kubernetes_container:/home/nixuser/results.txt hpl-results/${RUNNAME}.txt
