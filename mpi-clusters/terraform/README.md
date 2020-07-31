@@ -37,3 +37,7 @@ Running `build.sh` causes the following to happen:
 10. mpi-operator executes the runscript given in [hpl-benchmarks.tf](tf-kubernetes/staging/hpl-benchmarks.tf), and the results are automatically placed in the logs of the launcher node.
 11. Those logs are copied to the container, and then locally to hpl-results.txt
 
+This process is depicted in the following diagram
+![Terraform-Kubernetes](Terraform-Kubernetes-Setup.png)
+
+Furthermore, there is an example Asciicast of using this application available [locally](terraform-kubernetes.cast) as well as [online](https://asciinema.org/a/oQotgjY7fOL77xKGSLDZZP7Yc) (Consider adding `?speed=<speed increase factor>` to the URL).

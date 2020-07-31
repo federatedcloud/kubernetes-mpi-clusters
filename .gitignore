@@ -1,5 +1,4 @@
-# Local .terraform directories
-**/.terraform/*
+Include Local .terraform directories
 !/mpi-clusters/terraform/tf-kubernetes/.terraform/
 # .tfstate files
 *.tfstate
