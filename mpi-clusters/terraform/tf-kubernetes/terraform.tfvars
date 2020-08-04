@@ -1,4 +1,6 @@
 project_id    = "jetstream-documentation"
+owner         = "jcl393"
+zone          = "us-east4-a"
 region        = "us-east4"
 gke_num_nodes = 3
 machine_type  = "n1-standard-4"

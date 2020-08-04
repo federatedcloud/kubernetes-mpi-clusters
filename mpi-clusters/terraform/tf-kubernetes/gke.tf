@@ -13,7 +13,7 @@ resource "google_compute_subnetwork" "subnet" {
 data "google_container_engine_versions" "east4" {
   provider       = google-beta
   project        = var.project_id
-  location       = var.region
+  location       = var.zone
   version_prefix = "1.17."
 }
 
@@ -21,7 +21,7 @@ resource "google_container_cluster" "primary" {
   provider = google-beta
 
   name     = "kubernetes-tf-cluster"
-  location = var.region
+  location = var.zone
 
   remove_default_node_pool = true
   initial_node_count       = 1
@@ -40,16 +40,20 @@ resource "google_container_cluster" "primary" {
       issue_client_certificate = false
     }
   }
+  labels = {
+    resource = "tf-kubernetes-cluster"
+    owner    = var.owner
+  }
 }
 
 resource "google_container_node_pool" "primary_nodes" {
   provider = google-beta
 
   name     = "${google_container_cluster.primary.name}-node-pool"
-  location = var.region
+  location = var.zone
   cluster  = google_container_cluster.primary.name
 
-  initial_node_count = 1
+  initial_node_count = var.gke_num_nodes
   autoscaling {
     min_node_count = 0
     max_node_count = 6
@@ -86,6 +90,11 @@ output "project_id" {
   value       = var.project_id
   description = "GCP project id"
 }
+output "zone" {
+  value       = var.zone
+  description = "zone"
+}
+
 output "region" {
   value       = var.region
   description = "region"

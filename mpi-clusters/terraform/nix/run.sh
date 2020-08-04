@@ -6,7 +6,7 @@ echo "Connecting to gcp to deploy kubernetes resources"
 GCREDENTIALS_PATH=$(echo var.google_credentials | terraform console)
 gcloud auth activate-service-account --key-file=$GCREDENTIALS_PATH
 gcloud container clusters get-credentials $(terraform output cluster_name) \
-	--region $(terraform output region) \
+	--zone $(terraform output zone) \
 	--project $(terraform output project_id)
 echo "Creating namespace"
 cp staging/namespace.tf .

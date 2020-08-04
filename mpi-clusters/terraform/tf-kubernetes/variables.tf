@@ -2,8 +2,17 @@ variable "project_id" {
   description = "project id"
 }
 
+variable "owner" {
+  default     = ""
+  description = "identifier of person running tf-kubernetes"
+}
+
 variable "region" {
   description = "region"
+}
+
+variable "zone" {
+  description = "zone"
 }
 
 variable "gke_num_nodes" {
