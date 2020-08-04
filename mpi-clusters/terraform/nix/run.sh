@@ -9,20 +9,24 @@ gcloud container clusters get-credentials $(terraform output cluster_name) \
 	--region $(terraform output region) \
 	--project $(terraform output project_id)
 echo "Creating namespace"
-mv staging/namespace.tf .
+cp staging/namespace.tf .
 terraform apply --auto-approve
 echo "Adding service account, clusterrole, clusterrolebinding"
-mv staging/mpi-operator.tf .
+cp staging/mpi-operator.tf .
 terraform apply --auto-approve
 echo "Adding mpijob crd and deployment using kubernetes-alpha provider"
-mv staging/mpijob-crd.tf .
+cp staging/mpijob-crd.tf .
 terraform apply --auto-approve
-echo "Adding hpl-benchmarks MPIJob"
-mv staging/hpl-benchmarks.tf .
+echo "Adding MPIJob"
+cp staging/mpijob.tf .
 terraform apply --auto-approve
 echo "Waiting for pods to start"
-sleep 120
-CONTAINER_NAME=$(echo var.container_name | terraform console)
-kubectl cp HPL.dat ${CONTAINER_NAME}-worker-0:/home/nixuser
-echo "Running HPL"
-kubectl logs -f $(kubectl get pods -l mpi_job_name=${CONTAINER_NAME},mpi_role_type=launcher -o name) > /home/nixuser/results.txt
+MPIJOB_NAME=$(echo var.container_name | terraform console)
+POD_NAME=${MPIJOB_NAME}-worker-0
+#kubectl wait --for=condition=Ready pod/${POD_NAME} --timeout=300s
+source ../nix/wait.sh pod/${POD_NAME}
+kubectl cp ../mpi-files/* ${POD_NAME}:/home/nixuser
+echo "Running MPIJob"
+LAUNCHER=$(kubectl get pods -l mpi_job_name=${MPIJOB_NAME},mpi_role_type=launcher -o name)
+source ../nix/wait.sh ${LAUNCHER}
+kubectl logs -f ${LAUNCHER} > /home/nixuser/results.txt

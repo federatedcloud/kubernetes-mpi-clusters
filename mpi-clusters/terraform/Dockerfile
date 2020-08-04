@@ -5,11 +5,14 @@ USER $nixuser
 #Adding ansible and terraform files 
 COPY tf-kubernetes $HOME/tf-kubernetes
 COPY nix $HOME/nix
+COPY mpi-files $HOME/mpi-files
 COPY terraform /usr/bin
 USER root 
 
 #RUN echo $nixuser
 RUN chown -R $nixuser:$nixuser $HOME/tf-kubernetes \ 
-  $HOME/nix
+  $HOME/nix \
+  $HOME/mpi-files
+RUN chmod 775 $HOME/nix/run.sh $HOME/nix/rerun.sh $HOME/nix/wait.sh
 USER $nixuser
 RUN nix-shell /home/nixuser/nix/ --show-trace

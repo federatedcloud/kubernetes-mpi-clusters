@@ -1,0 +1,43 @@
++ POD_NAME=hpl-benchmarks-worker-0
++ [ h = - ]
++ shift
++ /opt/kube/kubectl cp /opt/kube/hosts hpl-benchmarks-worker-0:/etc/hosts_of_nodes
++ POD_NAME=hpl-benchmarks-worker-1
++ [ h = - ]
++ shift
++ /opt/kube/kubectl cp /opt/kube/hosts hpl-benchmarks-worker-1:/etc/hosts_of_nodes
++ /opt/kube/kubectl exec hpl-benchmarks-worker-1 -- /bin/sh -c cat /etc/hosts_of_nodes >> /etc/hosts &&  orted -mca ess "env" -mca ess_base_jobid "3736272896" -mca ess_base_vpid 2 -mca ess_base_num_procs "3" -mca orte_node_regex "hpl-benchmarks-launcher-dz[1:8]dq,hpl-benchmarks-worker-[1:0-1]@0(3)" -mca orte_hnp_uri "3736272896.0;tcp://10.24.4.7:58307" -mca plm "rsh" -mca orte_default_hostfile "/etc/mpi/hostfile" -mca plm_rsh_agent "/etc/mpi/kubexec.sh" -mca hwloc_base_binding_policy "core" -mca rmaps_base_mapping_policy "slot" -mca pmix "^s1,s2,cray,isolated"
++ /opt/kube/kubectl exec hpl-benchmarks-worker-0 -- /bin/sh -c cat /etc/hosts_of_nodes >> /etc/hosts &&  orted -mca ess "env" -mca ess_base_jobid "3736272896" -mca ess_base_vpid 1 -mca ess_base_num_procs "3" -mca orte_node_regex "hpl-benchmarks-launcher-dz[1:8]dq,hpl-benchmarks-worker-[1:0-1]@0(3)" -mca orte_hnp_uri "3736272896.0;tcp://10.24.4.7:58307" -mca plm "rsh" -mca orte_default_hostfile "/etc/mpi/hostfile" -mca plm_rsh_agent "/etc/mpi/kubexec.sh" -mca hwloc_base_binding_policy "core" -mca rmaps_base_mapping_policy "slot" -mca pmix "^s1,s2,cray,isolated"
+HPL ERROR from process # 0, on line 299 of function HPL_pdinfo:
+>>> cannot open file HPL.dat <<<
+
+[hpl-benchmarks-worker-0:00028] *** Process received signal ***
+[hpl-benchmarks-worker-0:00028] Signal: Segmentation fault (11)
+[hpl-benchmarks-worker-0:00028] Signal code: Address not mapped (1)
+[hpl-benchmarks-worker-0:00028] Failing at address: (nil)
+[hpl-benchmarks-worker-0:00028] [ 0] /nix/store/xg6ilb9g9zhi2zg1dpi4zcp288rhnvns-glibc-2.30/lib/libc.so.6(+0x381c0)[0x7f9562e101c0]
+[hpl-benchmarks-worker-0:00028] [ 1] /nix/store/xg6ilb9g9zhi2zg1dpi4zcp288rhnvns-glibc-2.30/lib/libc.so.6(fclose+0x4)[0x7f9562e477a4]
+[hpl-benchmarks-worker-0:00028] [ 2] xhpl[0x4050ca]
+[hpl-benchmarks-worker-0:00028] [ 3] xhpl[0x40247c]
+[hpl-benchmarks-worker-0:00028] [ 4] /nix/store/xg6ilb9g9zhi2zg1dpi4zcp288rhnvns-glibc-2.30/lib/libc.so.6(__libc_start_main+0xeb)[0x7f9562dfbd8b]
+[hpl-benchmarks-worker-0:00028] [ 5] xhpl[0x402c1a]
+[hpl-benchmarks-worker-0:00028] *** End of error message ***
+[hpl-benchmarks-worker-0][[57011,1],1][btl_tcp.c:559:mca_btl_tcp_recv_blocking] recv(16) failed: Connection reset by peer (104)
+--------------------------------------------------------------------------
+WARNING: Open MPI failed to TCP connect to a peer MPI process.  This
+should not happen.
+
+Your Open MPI job may now hang or fail.
+
+  Local host: hpl-benchmarks-worker-1
+  PID:        25
+  Message:    connect() to 10.24.5.6:1025 failed
+  Error:      Operation now in progress (115)
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+Primary job  terminated normally, but 1 process returned
+a non-zero exit code. Per user-direction, the job has been aborted.
+--------------------------------------------------------------------------
+--------------------------------------------------------------------------
+mpirun noticed that process rank 0 with PID 28 on node hpl-benchmarks-worker-0 exited on signal 11 (Segmentation fault).
+--------------------------------------------------------------------------

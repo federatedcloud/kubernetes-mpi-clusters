@@ -20,7 +20,7 @@ resource "kubernetes_manifest" "mpijob_hpl_benchmarks" {
                     "su",
                     "nixuser",
                     "-c",
-                    "nix-shell dev.nix --run \"sleep 60; cd ~; mpirun -np 4 --bind-to core --map-by slot xhpl\""
+                    "nix-shell dev.nix --run \"sleep 5; cd ~; mpirun -np 4 --bind-to core --map-by slot xhpl\""
                   ]
                   "image" = "cornellcac/nix-mpi-benchmarks:a4f3cd63f6994703bbaa0636f4ddbcc87e83ea05"
                   "name" = var.container_name

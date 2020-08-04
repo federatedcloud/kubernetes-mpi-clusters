@@ -11,6 +11,7 @@ stdenv.mkDerivation {
   # terraform and kubernetes required packages
   kubectl
   google-cloud-sdk
+  jq
   ];
   src = null; 
 }
