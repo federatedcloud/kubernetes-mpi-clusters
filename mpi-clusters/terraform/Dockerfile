@@ -13,6 +13,10 @@ USER root
 RUN chown -R $nixuser:$nixuser $HOME/tf-kubernetes \ 
   $HOME/nix \
   $HOME/mpi-files
-RUN chmod 775 $HOME/nix/run.sh $HOME/nix/rerun.sh $HOME/nix/wait.sh
+RUN chmod 775 $HOME/nix/run.sh \
+  $HOME/nix/rerun.sh \
+  $HOME/nix/wait.sh \
+  $HOME/nix/cp-all.sh \
+  $HOME/nix/gcloud-authn.sh
 USER $nixuser
 RUN nix-shell /home/nixuser/nix/ --show-trace

@@ -13,7 +13,7 @@ resource "google_compute_subnetwork" "subnet" {
 data "google_container_engine_versions" "east4" {
   provider       = google-beta
   project        = var.project_id
-  location       = var.zone
+  location       = var.zonal_cluster ? var.zone : var.region
   version_prefix = "1.17."
 }
 
@@ -21,7 +21,7 @@ resource "google_container_cluster" "primary" {
   provider = google-beta
 
   name     = "kubernetes-tf-cluster"
-  location = var.zone
+  location = var.zonal_cluster ? var.zone : var.region
 
   remove_default_node_pool = true
   initial_node_count       = 1
@@ -40,24 +40,16 @@ resource "google_container_cluster" "primary" {
       issue_client_certificate = false
     }
   }
-  labels = {
-    resource = "tf-kubernetes-cluster"
-    owner    = var.owner
-  }
 }
 
 resource "google_container_node_pool" "primary_nodes" {
   provider = google-beta
 
   name     = "${google_container_cluster.primary.name}-node-pool"
-  location = var.zone
+  location = var.zonal_cluster ? var.zone : var.region
   cluster  = google_container_cluster.primary.name
 
-  initial_node_count = var.gke_num_nodes
-  autoscaling {
-    min_node_count = 0
-    max_node_count = 6
-  }
+  node_count = var.gke_nodes_per_zone
 
   node_config {
     oauth_scopes = [
@@ -67,6 +59,8 @@ resource "google_container_node_pool" "primary_nodes" {
 
     labels = {
       env = var.project_id
+      resource = "tf-kubernetes-cluster"
+      owner    = var.owner
     }
 
     # preemptible  = true

@@ -4,7 +4,7 @@ resource "kubernetes_manifest" "mpijob_hpl_benchmarks" {
     "apiVersion" = "kubeflow.org/v1alpha2"
     "kind" = "MPIJob"
     "metadata" = {
-      "name" = "hpl-benchmarks"
+      "name" = var.container_name
       "namespace" = "default"
     }
     "spec" = {
@@ -20,9 +20,9 @@ resource "kubernetes_manifest" "mpijob_hpl_benchmarks" {
                     "su",
                     "nixuser",
                     "-c",
-                    "nix-shell dev.nix --run \"sleep 5; cd ~; mpirun -np 4 --bind-to core --map-by slot xhpl\""
+                    "nix-shell dev.nix --run \"cd ~; ${var.runscript}\""
                   ]
-                  "image" = "cornellcac/nix-mpi-benchmarks:a4f3cd63f6994703bbaa0636f4ddbcc87e83ea05"
+                  "image" = var.image_id
                   "name" = var.container_name
                 },
               ]
@@ -35,7 +35,7 @@ resource "kubernetes_manifest" "mpijob_hpl_benchmarks" {
             "spec" = {
               "containers" = [
                 {
-                  "image" = "cornellcac/nix-mpi-benchmarks:a4f3cd63f6994703bbaa0636f4ddbcc87e83ea05"
+                  "image" = var.image_id
                   "name" = var.container_name
                   "resources" = {
                     "limits" = null
