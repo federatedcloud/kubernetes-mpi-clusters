@@ -1,0 +1,73 @@
++ POD_NAME=hpl-benchmarks-worker-0
++ [ h = - ]
++ shift
++ /opt/kube/kubectl cp /opt/kube/hosts hpl-benchmarks-worker-0:/etc/hosts_of_nodes
++ POD_NAME=hpl-benchmarks-worker-1
++ [ h = - ]
++ shift
++ /opt/kube/kubectl cp /opt/kube/hosts hpl-benchmarks-worker-1:/etc/hosts_of_nodes
++ /opt/kube/kubectl exec hpl-benchmarks-worker-0 -- /bin/sh -c cat /etc/hosts_of_nodes >> /etc/hosts &&  orted -mca ess "env" -mca ess_base_jobid "1977810944" -mca ess_base_vpid 1 -mca ess_base_num_procs "3" -mca orte_node_regex "hpl-benchmarks-launcher-[1:2]lgnz,hpl-benchmarks-worker-[1:0-1]@0(3)" -mca orte_hnp_uri "1977810944.0;tcp://10.52.2.9:47917" -mca plm "rsh" -mca orte_default_hostfile "/etc/mpi/hostfile" -mca plm_rsh_agent "/etc/mpi/kubexec.sh" -mca hwloc_base_binding_policy "core" -mca rmaps_base_mapping_policy "slot" -mca pmix "^s1,s2,cray,isolated"
++ /opt/kube/kubectl exec hpl-benchmarks-worker-1 -- /bin/sh -c cat /etc/hosts_of_nodes >> /etc/hosts &&  orted -mca ess "env" -mca ess_base_jobid "1977810944" -mca ess_base_vpid 2 -mca ess_base_num_procs "3" -mca orte_node_regex "hpl-benchmarks-launcher-[1:2]lgnz,hpl-benchmarks-worker-[1:0-1]@0(3)" -mca orte_hnp_uri "1977810944.0;tcp://10.52.2.9:47917" -mca plm "rsh" -mca orte_default_hostfile "/etc/mpi/hostfile" -mca plm_rsh_agent "/etc/mpi/kubexec.sh" -mca hwloc_base_binding_policy "core" -mca rmaps_base_mapping_policy "slot" -mca pmix "^s1,s2,cray,isolated"
+================================================================================
+HPLinpack 2.3  --  High-Performance Linpack benchmark  --   December 2, 2018
+Written by A. Petitet and R. Clint Whaley,  Innovative Computing Laboratory, UTK
+Modified by Piotr Luszczek, Innovative Computing Laboratory, UTK
+Modified by Julien Langou, University of Colorado Denver
+================================================================================
+
+An explanation of the input/output parameters follows:
+T/V    : Wall time / encoded variant.
+N      : The order of the coefficient matrix A.
+NB     : The partitioning blocking factor.
+P      : The number of process rows.
+Q      : The number of process columns.
+Time   : Time in seconds to solve the linear system.
+Gflops : Rate of execution for solving the linear system.
+
+The following parameter values will be used:
+
+N      :   20480 
+NB     :     192 
+PMAP   : Row-major process mapping
+P      :       2 
+Q      :       2 
+PFACT  :   Right 
+NBMIN  :       4 
+NDIV   :       2 
+RFACT  :   Crout 
+BCAST  :  1ringM 
+DEPTH  :       1 
+SWAP   : Mix (threshold = 64)
+L1     : transposed form
+U      : transposed form
+EQUIL  : yes
+ALIGN  : 8 double precision words
+
+--------------------------------------------------------------------------------
+
+- The matrix A is randomly generated for each test.
+- The following scaled residual check will be computed:
+      ||Ax-b||_oo / ( eps * ( || x ||_oo * || A ||_oo + || b ||_oo ) * N )
+- The relative machine precision (eps) is taken to be               1.110223e-16
+- Computational tests pass if scaled residuals are less than                16.0
+
+================================================================================
+T/V                N    NB     P     Q               Time                 Gflops
+--------------------------------------------------------------------------------
+WR11C2R4       20480   192     2     2              44.59             1.2845e+02
+HPL_pdgesv() start time Wed Aug  5 20:50:00 2020
+
+HPL_pdgesv() end time   Wed Aug  5 20:50:45 2020
+
+--------------------------------------------------------------------------------
+||Ax-b||_oo/(eps*(||A||_oo*||x||_oo+||b||_oo)*N)=   2.20186272e-03 ...... PASSED
+================================================================================
+
+Finished      1 tests with the following results:
+              1 tests completed and passed residual checks,
+              0 tests completed and failed residual checks,
+              0 tests skipped because of illegal input values.
+--------------------------------------------------------------------------------
+
+End of Tests.
+================================================================================
