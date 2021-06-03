@@ -12,7 +12,7 @@ cp staging/mpijob.tf .
 terraform apply --auto-approve
 
 echo "Wating for pods to start"
-MPIJOB_NAME=$(echo var.container_name | terraform console)
+MPIJOB_NAME=$(terraform output -raw container_name)
 source ../nix/wait.sh pod/${MPIJOB_NAME}-worker-0
 source ../nix/cp-all.sh ../mpi-files ${MPIJOB_NAME}-worker-0
 

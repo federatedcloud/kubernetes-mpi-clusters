@@ -16,6 +16,7 @@ resource "kubernetes_manifest" "mpijob_hpl_benchmarks" {
             "spec" = {
               "containers" = [
                 {
+# Syntax might not work with newer versions
                   "command" = [
                     "su",
                     "nixuser",

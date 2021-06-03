@@ -44,7 +44,7 @@ resource "google_container_cluster" "primary" {
 
 resource "google_container_node_pool" "primary_nodes" {
   provider = google-beta
-
+  # Newer versions might change this syntax
   name     = "${google_container_cluster.primary.name}-node-pool"
   location = var.zonal_cluster ? var.zone : var.region
   cluster  = google_container_cluster.primary.name
@@ -65,7 +65,8 @@ resource "google_container_node_pool" "primary_nodes" {
 
     # preemptible  = true
     machine_type = var.machine_type
-    tags         = ["gke-node", "${google_container_cluster.primary.name}"]
+    # Newer versions might change this syntax
+    tags         = ["gke-node", google_container_cluster.primary.name]
     metadata = {
       disable-legacy-endpoints = "true"
     }
@@ -88,8 +89,19 @@ output "zone" {
   value       = var.zone
   description = "zone"
 }
-
 output "region" {
   value       = var.region
   description = "region"
+}
+output "google_credentials_file" {
+  value       = var.google_credentials
+  description = "path to google credentials file"
+}
+output "container_name" {
+  value       = var.container_name
+  description = "name of remote container"
+}
+output "mpi_file_dest" {
+  value       = var.mpi_file_dest
+  description = "where to inject additional mpi files into nodes"
 }
