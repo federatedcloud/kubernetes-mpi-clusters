@@ -6,7 +6,7 @@ USER $nixuser
 COPY tf-kubernetes $HOME/tf-kubernetes
 COPY nix $HOME/nix
 COPY mpi-files $HOME/mpi-files
-COPY terraform /usr/bin
+#COPY terraform /usr/bin
 USER root 
 
 #RUN echo $nixuser
@@ -18,5 +18,7 @@ RUN chmod 775 $HOME/nix/run.sh \
   $HOME/nix/wait.sh \
   $HOME/nix/cp-all.sh \
   $HOME/nix/gcloud-authn.sh
+RUN wget https://releases.hashicorp.com/terraform/1.0.0/terraform_1.0.0_linux_amd64.zip \
+  && unzip terraform_1.0.0_linux_amd64.zip && mv terraform /usr/bin
 USER $nixuser
 RUN nix-shell /home/nixuser/nix/ --show-trace

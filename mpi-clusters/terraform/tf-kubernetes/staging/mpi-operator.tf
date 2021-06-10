@@ -1,4 +1,13 @@
-resource "kubernetes_manifest" "clusterrole_mpi_operator" {
+resource "kubernetes_namespace" "mpi_operator" {
+  depends_on = [
+    google_container_node_pool.primary_nodes
+  ]
+  metadata {
+    name = "mpi-operator"
+  }
+}
+
+resource "kubernetes_manifest" "clusterrole_mpi_operator" { 
   provider = kubernetes-alpha
   manifest = {
     "apiVersion" = "rbac.authorization.k8s.io/v1"
@@ -19,6 +28,7 @@ resource "kubernetes_manifest" "clusterrole_mpi_operator" {
           "create",
           "list",
           "watch",
+          "update",
         ]
       },
       {
@@ -29,9 +39,13 @@ resource "kubernetes_manifest" "clusterrole_mpi_operator" {
           "pods",
         ]
         "verbs" = [
+          "create",
           "get",
           "list",
           "watch",
+          "delete",
+          "update",
+          "patch",
         ]
       },
       {
@@ -82,6 +96,7 @@ resource "kubernetes_manifest" "clusterrole_mpi_operator" {
           "create",
           "list",
           "watch",
+          "update",
         ]
       },
       {
@@ -90,34 +105,6 @@ resource "kubernetes_manifest" "clusterrole_mpi_operator" {
         ]
         "resources" = [
           "poddisruptionbudgets",
-        ]
-        "verbs" = [
-          "create",
-          "list",
-          "update",
-          "watch",
-        ]
-      },
-      {
-        "apiGroups" = [
-          "apps",
-        ]
-        "resources" = [
-          "statefulsets",
-        ]
-        "verbs" = [
-          "create",
-          "list",
-          "update",
-          "watch",
-        ]
-      },
-      {
-        "apiGroups" = [
-          "batch",
-        ]
-        "resources" = [
-          "jobs",
         ]
         "verbs" = [
           "create",
@@ -155,6 +142,7 @@ resource "kubernetes_manifest" "clusterrole_mpi_operator" {
         "apiGroups" = [
           "scheduling.incubator.k8s.io",
           "scheduling.sigs.dev",
+          "scheduling.volcano.sh",
         ]
         "resources" = [
           "queues",
@@ -169,38 +157,177 @@ resource "kubernetes_manifest" "clusterrole_mpi_operator" {
 }
 
 resource "kubernetes_manifest" "serviceaccount_mpi_operator" {
+  depends_on = [
+    kubernetes_namespace.mpi_operator
+  ]
+  provider = kubernetes-alpha                                 
+  manifest = {                                                
+    "apiVersion" = "v1"                                       
+    "kind" = "ServiceAccount"                                 
+    "metadata" = {                                            
+      "name" = "mpi-operator"                                 
+      "namespace" = "mpi-operator"                            
+    }                                                         
+  }                                                           
+}                                                                 
+                                                                  
+resource "kubernetes_manifest" "clusterrolebinding_mpi_operator" {
+  provider = kubernetes-alpha                                     
+  depends_on = [
+    kubernetes_namespace.mpi_operator
+  ]
+  manifest = {                                                    
+    "apiVersion" = "rbac.authorization.k8s.io/v1"                 
+    "kind" = "ClusterRoleBinding"                                 
+    "metadata" = {                                                
+      "name" = "mpi-operator"                                     
+    }                                                             
+    "roleRef" = {                                                 
+      "apiGroup" = "rbac.authorization.k8s.io"                    
+      "kind" = "ClusterRole"                                      
+      "name" = "mpi-operator"                                     
+    }                                                             
+    "subjects" = [                                                
+      {                                                           
+        "kind" = "ServiceAccount"                                 
+        "name" = "mpi-operator"                                   
+        "namespace" = "mpi-operator"                              
+      },                                                          
+    ]                                                             
+  }                                                               
+}
+
+resource "kubernetes_manifest" "customresourcedefinition_mpijobs_kubeflow_org" {
+  depends_on = [
+    kubernetes_namespace.mpi_operator
+  ]
   provider = kubernetes-alpha
   manifest = {
-    "apiVersion" = "v1"
-    "kind" = "ServiceAccount"
+    "apiVersion" = "apiextensions.k8s.io/v1beta1"
+    "kind" = "CustomResourceDefinition"
     "metadata" = {
-      "name" = "mpi-operator"
-      "namespace" = "mpi-operator"
+      "name" = "mpijobs.kubeflow.org"
+    }
+    "spec" = {
+      "additionalPrinterColumns" = [
+        {
+          "JSONPath" = ".metadata.creationTimestamp"
+          "name" = "Age"
+          "type" = "date"
+        },
+      ]
+      "group" = "kubeflow.org"
+      "names" = {
+        "kind" = "MPIJob"
+        "plural" = "mpijobs"
+        "shortNames" = [
+          "mj",
+          "mpij",
+        ]
+        "singular" = "mpijob"
+      }
+      "scope" = "Namespaced"
+      "subresources" = {
+        "status" = {}
+      }
+      "preserveUnknownFields" = "true"
+      "validation" = {
+        "openAPIV3Schema" = {
+          "type" = "object"
+          "properties" = {
+            "spec" = {
+              "type" = "object"
+              "properties" = {
+                "mpiReplicaSpecs" = {
+                  "type" = "object"
+                  "properties" = {
+                    "Launcher" = {
+                      "type" = "object"
+                      "properties" = {
+                        "replicas" = {
+                          "maximum" = 1
+                          "minimum" = 1
+                          "type" = "integer"
+                        }
+                      }
+                    }
+                    "Worker" = {
+                      "type" = "object"
+                      "properties" = {
+                        "replicas" = {
+                          "minimum" = 1
+                          "type" = "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+                "slotsPerWorker" = {
+                  "minimum" = 1
+                  "type" = "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+      "version" = "v1"
     }
   }
 }
 
-resource "kubernetes_manifest" "clusterrolebinding_mpi_operator" {
+resource "kubernetes_manifest" "deployment_mpi_operator" {
+  depends_on = [
+    kubernetes_manifest.serviceaccount_mpi_operator
+  ]
   provider = kubernetes-alpha
   manifest = {
-    "apiVersion" = "rbac.authorization.k8s.io/v1"
-    "kind" = "ClusterRoleBinding"
+    "apiVersion" = "apps/v1"
+    "kind" = "Deployment"
     "metadata" = {
+      "labels" = {
+        "app" = "mpi-operator"
+      }
       "name" = "mpi-operator"
       "namespace" = "mpi-operator"
     }
-    "roleRef" = {
-      "apiGroup" = "rbac.authorization.k8s.io"
-      "kind" = "ClusterRole"
-      "name" = "mpi-operator"
+    "spec" = {
+      "replicas" = 1
+      "selector" = {
+        "matchLabels" = {
+          "app" = "mpi-operator"
+        }
+      }
+      "template" = {
+        "metadata" = {
+          "labels" = {
+            "app" = "mpi-operator"
+          }
+        }
+        "spec" = {
+          "containers" = [
+            {
+              "args" = [
+                "-alsologtostderr",
+                "--kubectl-delivery-image",
+                "mpioperator/kubectl-delivery:v0.2.3",
+                "--namespace",
+                "mpi-operator",
+                "--lock-namespace",
+                "mpi-operator",
+              ]
+              "command" = [
+                "/opt/mpi-operator.v1",
+              ]
+              "image" = "mpioperator/mpi-operator:v0.2.3"
+              "imagePullPolicy" = "Always"
+              "name" = "mpi-operator"
+            },
+          ]
+          "serviceAccountName" = "mpi-operator"
+        }
+      }
     }
-    "subjects" = [
-      {
-        "kind" = "ServiceAccount"
-        "name" = "mpi-operator"
-        "namespace" = "mpi-operator"
-      },
-    ]
   }
 }
 

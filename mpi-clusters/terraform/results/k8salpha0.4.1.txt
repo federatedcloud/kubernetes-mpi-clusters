@@ -1,0 +1,82 @@
++ POD_NAME=hpl-benchmarks-worker-0
++ shift
++ /opt/kube/kubectl exec hpl-benchmarks-worker-0 -- /bin/sh -c  orted -mca ess "env" -mca ess_base_jobid "3685023744" -mca ess_base_vpid 1 -mca ess_base_num_procs "4" -mca orte_node_regex "hpl-benchmarks-launcher,hpl-benchmarks-worker-[1:0-2]@0(4)" -mca orte_hnp_uri "3685023744.0;tcp://10.24.5.4:40117" -mca plm "rsh" -mca orte_default_hostfile "/etc/mpi/hostfile" -mca plm_rsh_agent "/etc/mpi/kubexec.sh" -mca hwloc_base_binding_policy "core" -mca rmaps_base_mapping_policy "slot" -mca pmix "^s1,s2,cray,isolated"
++ POD_NAME=hpl-benchmarks-worker-1
++ shift
++ /opt/kube/kubectl exec hpl-benchmarks-worker-1 -- /bin/sh -c  orted -mca ess "env" -mca ess_base_jobid "3685023744" -mca ess_base_vpid 2 -mca ess_base_num_procs "4" -mca orte_node_regex "hpl-benchmarks-launcher,hpl-benchmarks-worker-[1:0-2]@0(4)" -mca orte_hnp_uri "3685023744.0;tcp://10.24.5.4:40117" -mca plm "rsh" -mca orte_default_hostfile "/etc/mpi/hostfile" -mca plm_rsh_agent "/etc/mpi/kubexec.sh" -mca hwloc_base_binding_policy "core" -mca rmaps_base_mapping_policy "slot" -mca pmix "^s1,s2,cray,isolated"
++ POD_NAME=hpl-benchmarks-worker-2
++ shift
++ /opt/kube/kubectl exec hpl-benchmarks-worker-2 -- /bin/sh -c  orted -mca ess "env" -mca ess_base_jobid "3685023744" -mca ess_base_vpid 3 -mca ess_base_num_procs "4" -mca orte_node_regex "hpl-benchmarks-launcher,hpl-benchmarks-worker-[1:0-2]@0(4)" -mca orte_hnp_uri "3685023744.0;tcp://10.24.5.4:40117" -mca plm "rsh" -mca orte_default_hostfile "/etc/mpi/hostfile" -mca plm_rsh_agent "/etc/mpi/kubexec.sh" -mca hwloc_base_binding_policy "core" -mca rmaps_base_mapping_policy "slot" -mca pmix "^s1,s2,cray,isolated"
+================================================================================
+HPLinpack 2.3  --  High-Performance Linpack benchmark  --   December 2, 2018
+Written by A. Petitet and R. Clint Whaley,  Innovative Computing Laboratory, UTK
+Modified by Piotr Luszczek, Innovative Computing Laboratory, UTK
+Modified by Julien Langou, University of Colorado Denver
+================================================================================
+
+An explanation of the input/output parameters follows:
+T/V    : Wall time / encoded variant.
+N      : The order of the coefficient matrix A.
+NB     : The partitioning blocking factor.
+P      : The number of process rows.
+Q      : The number of process columns.
+Time   : Time in seconds to solve the linear system.
+Gflops : Rate of execution for solving the linear system.
+
+The following parameter values will be used:
+
+N      :   20480    40960 
+NB     :     192 
+PMAP   : Row-major process mapping
+P      :       2 
+Q      :       3 
+PFACT  :   Right 
+NBMIN  :       4 
+NDIV   :       2 
+RFACT  :   Crout 
+BCAST  :  1ringM 
+DEPTH  :       1 
+SWAP   : Mix (threshold = 64)
+L1     : transposed form
+U      : transposed form
+EQUIL  : yes
+ALIGN  : 8 double precision words
+
+--------------------------------------------------------------------------------
+
+- The matrix A is randomly generated for each test.
+- The following scaled residual check will be computed:
+      ||Ax-b||_oo / ( eps * ( || x ||_oo * || A ||_oo + || b ||_oo ) * N )
+- The relative machine precision (eps) is taken to be               1.110223e-16
+- Computational tests pass if scaled residuals are less than                16.0
+
+================================================================================
+T/V                N    NB     P     Q               Time                 Gflops
+--------------------------------------------------------------------------------
+WR11C2R4       20480   192     2     3              40.40             1.4178e+02
+HPL_pdgesv() start time Thu Jun 10 22:51:54 2021
+
+HPL_pdgesv() end time   Thu Jun 10 22:52:34 2021
+
+--------------------------------------------------------------------------------
+||Ax-b||_oo/(eps*(||A||_oo*||x||_oo+||b||_oo)*N)=   2.08340640e-03 ...... PASSED
+================================================================================
+T/V                N    NB     P     Q               Time                 Gflops
+--------------------------------------------------------------------------------
+WR11C2R4       40960   192     2     3             276.63             1.6562e+02
+HPL_pdgesv() start time Thu Jun 10 22:52:47 2021
+
+HPL_pdgesv() end time   Thu Jun 10 22:57:23 2021
+
+--------------------------------------------------------------------------------
+||Ax-b||_oo/(eps*(||A||_oo*||x||_oo+||b||_oo)*N)=   2.06593285e-03 ...... PASSED
+================================================================================
+
+Finished      2 tests with the following results:
+              2 tests completed and passed residual checks,
+              0 tests completed and failed residual checks,
+              0 tests skipped because of illegal input values.
+--------------------------------------------------------------------------------
+
+End of Tests.
+================================================================================

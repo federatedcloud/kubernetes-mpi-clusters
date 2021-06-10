@@ -1,11 +1,14 @@
 resource "kubernetes_manifest" "mpijob_hpl_benchmarks" {
+  depends_on = [
+    kubernetes_manifest.customresourcedefinition_mpijobs_kubeflow_org
+  ]
   provider = kubernetes-alpha
   manifest = {
-    "apiVersion" = "kubeflow.org/v1alpha2"
+    "apiVersion" = "kubeflow.org/v1"
     "kind" = "MPIJob"
     "metadata" = {
       "name" = var.container_name
-      "namespace" = "default"
+      "namespace" = "mpi-operator"
     }
     "spec" = {
       "cleanPodPolicy" = "Running"
@@ -16,12 +19,11 @@ resource "kubernetes_manifest" "mpijob_hpl_benchmarks" {
             "spec" = {
               "containers" = [
                 {
-# Syntax might not work with newer versions
                   "command" = [
                     "su",
                     "nixuser",
                     "-c",
-                    "nix-shell dev.nix --run \"cd ~; ${var.runscript}\""
+                    "nix-shell dev.nix --run 'sleep 10; cd ~; ${var.runscript}'"
                   ]
                   "image" = var.image_id
                   "name" = var.container_name
@@ -39,7 +41,10 @@ resource "kubernetes_manifest" "mpijob_hpl_benchmarks" {
                   "image" = var.image_id
                   "name" = var.container_name
                   "resources" = {
-                    "limits" = null
+                    "limits" = {
+                      "cpu" = 3
+                      "memory" = "10Gi"
+                    }
                   }
                 },
               ]

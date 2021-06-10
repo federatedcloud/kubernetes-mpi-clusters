@@ -44,7 +44,6 @@ resource "google_container_cluster" "primary" {
 
 resource "google_container_node_pool" "primary_nodes" {
   provider = google-beta
-  # Newer versions might change this syntax
   name     = "${google_container_cluster.primary.name}-node-pool"
   location = var.zonal_cluster ? var.zone : var.region
   cluster  = google_container_cluster.primary.name
@@ -65,7 +64,6 @@ resource "google_container_node_pool" "primary_nodes" {
 
     # preemptible  = true
     machine_type = var.machine_type
-    # Newer versions might change this syntax
     tags         = ["gke-node", google_container_cluster.primary.name]
     metadata = {
       disable-legacy-endpoints = "true"

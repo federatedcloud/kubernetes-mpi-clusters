@@ -11,11 +11,11 @@ terraform {
     }
     kubernetes = {
       source = "hashicorp/kubernetes"
-      version = "1.12.0"
+      version = "2.3.1"
     }
     kubernetes-alpha = {
       source = "hashicorp/kubernetes-alpha"
-      version = "0.2.0"
+      version = "0.4.1"
     }
   }
   required_version = ">= 0.14"
@@ -34,11 +34,9 @@ provider "google-beta" {
 }
 
 provider "kubernetes" {
-  load_config_file = true
   config_path = "~/.kube/config"
 }
 
 provider "kubernetes-alpha" {
-  server_side_planning = true
   config_path = "~/.kube/config"
 }
