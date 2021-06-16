@@ -16,7 +16,6 @@ RUN chown -R $nixuser:$nixuser $HOME/tf-kubernetes \
 RUN chmod 775 $HOME/nix/run.sh \
   $HOME/nix/rerun.sh \
   $HOME/nix/wait.sh \
-  $HOME/nix/cp-all.sh \
   $HOME/nix/gcloud-authn.sh
 RUN wget https://releases.hashicorp.com/terraform/1.0.0/terraform_1.0.0_linux_amd64.zip \
   && unzip terraform_1.0.0_linux_amd64.zip && mv terraform /usr/bin

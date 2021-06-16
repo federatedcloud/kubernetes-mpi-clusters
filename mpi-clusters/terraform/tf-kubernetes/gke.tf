@@ -10,45 +10,36 @@ resource "google_compute_subnetwork" "subnet" {
   ip_cidr_range = "10.10.0.0/24"
 }
 
-data "google_container_engine_versions" "east4" {
+data "google_container_engine_versions" "versions" {
   provider       = google-beta
   project        = var.project_id
   location       = var.zonal_cluster ? var.zone : var.region
-  version_prefix = "1.17."
+  version_prefix = "1.19."
 }
 
 resource "google_container_cluster" "primary" {
-  provider = google-beta
-
   name     = "kubernetes-tf-cluster"
   location = var.zonal_cluster ? var.zone : var.region
 
   remove_default_node_pool = true
   initial_node_count       = 1
 
-  node_version = data.google_container_engine_versions.east4.release_channel_default_version["RAPID"]
-  min_master_version = data.google_container_engine_versions.east4.release_channel_default_version["RAPID"]
+  min_master_version = data.google_container_engine_versions.versions.release_channel_default_version["STABLE"]
   release_channel {
-    channel = "RAPID"
+    channel = "STABLE"
   }
 
   network    = google_compute_network.vpc.name
   subnetwork = google_compute_subnetwork.subnet.name
-
-  master_auth {
-    client_certificate_config {
-      issue_client_certificate = false
-    }
-  }
 }
 
 resource "google_container_node_pool" "primary_nodes" {
-  provider = google-beta
   name     = "${google_container_cluster.primary.name}-node-pool"
   location = var.zonal_cluster ? var.zone : var.region
   cluster  = google_container_cluster.primary.name
 
   node_count = var.gke_nodes_per_zone
+  version    = data.google_container_engine_versions.versions.release_channel_default_version["STABLE"]
 
   node_config {
     oauth_scopes = [
@@ -57,7 +48,7 @@ resource "google_container_node_pool" "primary_nodes" {
     ]
 
     labels = {
-      env = var.project_id
+      env      = var.project_id
       resource = "tf-kubernetes-cluster"
       owner    = var.owner
     }
@@ -94,12 +85,9 @@ output "region" {
 output "google_credentials_file" {
   value       = var.google_credentials
   description = "path to google credentials file"
+  sensitive   = true
 }
 output "container_name" {
   value       = var.container_name
   description = "name of remote container"
-}
-output "mpi_file_dest" {
-  value       = var.mpi_file_dest
-  description = "where to inject additional mpi files into nodes"
 }

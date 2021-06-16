@@ -1,20 +1,20 @@
 terraform {
   required_providers {
     google = {
-      source = "hashicorp/google"
-      version = "3.32.0"
+      source  = "hashicorp/google"
+      version = ">= 3.72.0"
     }
     google-beta = {
-      source = "hashicorp/google-beta"
-      version = "3.32.0"
+      source  = "hashicorp/google-beta"
+      version = ">= 3.72.0"
 
     }
     kubernetes = {
-      source = "hashicorp/kubernetes"
-      version = "2.3.1"
+      source  = "hashicorp/kubernetes"
+      version = ">= 2.3.1"
     }
     kubernetes-alpha = {
-      source = "hashicorp/kubernetes-alpha"
+      source  = "hashicorp/kubernetes-alpha"
       version = "0.4.1"
     }
   }
@@ -23,12 +23,14 @@ terraform {
 
 provider "google" {
   project     = var.project_id
+  region      = var.region
   zone        = var.zone
   credentials = file(var.google_credentials)
 }
 
 provider "google-beta" {
   project     = var.project_id
+  region      = var.region
   zone        = var.zone
   credentials = file(var.google_credentials)
 }

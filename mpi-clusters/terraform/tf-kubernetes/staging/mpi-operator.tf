@@ -197,7 +197,7 @@ resource "kubernetes_manifest" "clusterrolebinding_mpi_operator" {
   }                                                               
 }
 
-resource "kubernetes_manifest" "customresourcedefinition_mpijobs_kubeflow_org" {
+resource "kubernetes_manifest" "mpijob_crd" {
   depends_on = [
     kubernetes_namespace.mpi_operator
   ]
@@ -331,3 +331,16 @@ resource "kubernetes_manifest" "deployment_mpi_operator" {
   }
 }
 
+resource "kubernetes_config_map" "file_mount" {
+  depends_on = [
+    kubernetes_namespace.mpi_operator
+  ]
+  metadata {
+    name = "cfgmap-file-mount"
+    namespace = "mpi-operator"
+  }
+
+  data = {
+    "HPL.dat" = "${file("${path.root}/${var.path_to_file}")}"
+  }
+}

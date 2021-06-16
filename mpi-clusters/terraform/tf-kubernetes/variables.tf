@@ -60,7 +60,7 @@ variable "runscript" {
   description = "mpirun command"
 }
 
-variable "mpi_file_dest" {
-  default     = "/home/nixuser"
-  description = "location to copy contents of mpi-files to"
+variable "path_to_file" {
+  default     = "../mpi-files/HPL.dat"
+  description = "Location of file that will be mounted via configmap"
 }

@@ -1,6 +1,6 @@
 project_id         = "jetstream-documentation"
 owner              = "jcl393"
-zone               = "us-east4-a"
+zone               = ""
 region             = "us-east4"
 zonal_cluster      = false
 gke_nodes_per_zone = 1
@@ -10,5 +10,5 @@ slots_per_worker   = 2
 google_credentials = "gCredNew.json"
 container_name     = "hpl-benchmarks"
 runscript          = "mpirun -np 6 --bind-to core --map-by slot xhpl"
-mpi_file_dest      = "/home/nixuser"
+path_to_file       = "../mpi-files/HPLsmall.dat"
 image_id           = "cornellcac/nix-mpi-benchmarks:a4f3cd63f6994703bbaa0636f4ddbcc87e83ea05"
