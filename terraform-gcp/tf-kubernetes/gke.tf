@@ -1,3 +1,4 @@
+## Set up network to enable cluster communication
 resource "google_compute_network" "vpc" {
   name                    = "kubernetes-tf-network"
   auto_create_subnetworks = "false"
@@ -10,6 +11,7 @@ resource "google_compute_subnetwork" "subnet" {
   ip_cidr_range = "10.10.0.0/24"
 }
 
+## Find versions of kubernetes to run the cluster on
 data "google_container_engine_versions" "versions" {
   provider       = google-beta
   project        = var.project_id
@@ -17,13 +19,14 @@ data "google_container_engine_versions" "versions" {
   version_prefix = "1.19."
 }
 
+## Create GKE Cluster
 resource "google_container_cluster" "primary" {
   name     = "kubernetes-tf-cluster"
   location = var.zonal_cluster ? var.zone : var.region
-
+  ## Removing default node pool gives more control over nodes
   remove_default_node_pool = true
   initial_node_count       = 1
-
+  ## Ensure stable kubernetes version
   min_master_version = data.google_container_engine_versions.versions.release_channel_default_version["STABLE"]
   release_channel {
     channel = "STABLE"
@@ -33,6 +36,7 @@ resource "google_container_cluster" "primary" {
   subnetwork = google_compute_subnetwork.subnet.name
 }
 
+## Add actual working nodes
 resource "google_container_node_pool" "primary_nodes" {
   name     = "${google_container_cluster.primary.name}-node-pool"
   location = var.zonal_cluster ? var.zone : var.region
@@ -62,13 +66,10 @@ resource "google_container_node_pool" "primary_nodes" {
   }
 }
 
+## Outputs printed that are used in various scripts
 output "cluster_name" {
   value       = google_container_cluster.primary.name
   description = "GKE Cluster Name"
-}
-output "version" {
-  value       = google_container_cluster.primary.master_version
-  description = "master version"
 }
 output "project_id" {
   value       = var.project_id

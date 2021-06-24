@@ -14,18 +14,22 @@ resource "kubernetes_manifest" "mpijob" {
     "spec" = {
       "cleanPodPolicy" = "Running"
       "mpiReplicaSpecs" = {
+        ## Consider using NodeAffinity and second node pool to free resources
         "Launcher" = {
           "replicas" = 1
           "template" = {
             "spec" = {
               "containers" = [
                 {
+                  ## Ensures commands are running in proper environment
+                  ## May want to change the last line
                   "command" = [
                     "su",
                     "nixuser",
                     "-c",
                     "nix-shell dev.nix --run 'cd ~; ${var.runscript}'"
                   ]
+                  ## Not sure if this image needs to match Worker image
                   "image" = var.image_id
                   "name" = var.container_name
                 },
@@ -41,16 +45,20 @@ resource "kubernetes_manifest" "mpijob" {
                 {
                   "image" = var.image_id
                   "name" = var.container_name
+                  ## Ensure one worker pod per node
                   "resources" = {
+                    ## Set limits to be the maximum cpu, memory per node
                     "limits" = {
                       "cpu" = "4"
                       "memory" = "15G"
                     }
+                    ## Set requests to be just over half of cpu, memory per node
                     "requests" = {
                       "cpu" = "2500m"
                       "memory" = "10G"
                     }
                   }
+                  ## Defines which volumes to mount for this container and where
                   "volumeMounts" = [
                     {
                       "mountPath" = "/home/nixuser/HPL.dat"
@@ -60,6 +68,7 @@ resource "kubernetes_manifest" "mpijob" {
                   ]
                 },
               ]
+              ## Defines which volumes are accessible to the pod
               "volumes" = [
                 {
                   "name" = "cfgmap"

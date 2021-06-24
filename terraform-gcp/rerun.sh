@@ -1,3 +1,5 @@
+#!/bin/bash
+## Updates configuration options for the GKE cluster safely.
 RUNNAME=$1
 if [ ! -z ${RUNNAME} ]
 then

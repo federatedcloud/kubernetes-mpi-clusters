@@ -8,11 +8,11 @@ variable "owner" {
 }
 
 variable "region" {
-  description = "region"
+  description = "cluster region"
 }
 
 variable "zone" {
-  description = "zone"
+  description = "cluster zone"
 }
 
 variable "zonal_cluster" {
@@ -27,12 +27,12 @@ variable "gke_nodes_per_zone" {
 }
 
 variable "google_credentials" {
-  description = "path to google credentials file"
+  description = "path to google credentials file inside container"
 }
 
 variable "machine_type" {
   default     = "n1-standard-1"
-  description = "machine type"
+  description = "virtual machine type"
 }
 
 variable "num_workers" {

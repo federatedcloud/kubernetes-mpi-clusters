@@ -1,3 +1,4 @@
+## Creates namespace to put all mpi-operator resources in
 resource "kubernetes_namespace" "mpi_operator" {
   depends_on = [
     google_container_node_pool.primary_nodes
@@ -7,6 +8,7 @@ resource "kubernetes_namespace" "mpi_operator" {
   }
 }
 
+## Sets up permissions for mpi-operator resources
 resource "kubernetes_manifest" "clusterrole_mpi_operator" { 
   provider = kubernetes-alpha
   manifest = {
@@ -156,6 +158,7 @@ resource "kubernetes_manifest" "clusterrole_mpi_operator" {
   }
 }
 
+## Connects resources to the associated permissions
 resource "kubernetes_manifest" "serviceaccount_mpi_operator" {
   depends_on = [
     kubernetes_namespace.mpi_operator
@@ -197,6 +200,7 @@ resource "kubernetes_manifest" "clusterrolebinding_mpi_operator" {
   }                                                               
 }
 
+## Defines the MPIJob resource
 resource "kubernetes_manifest" "mpijob_crd" {
   depends_on = [
     kubernetes_namespace.mpi_operator
@@ -230,6 +234,7 @@ resource "kubernetes_manifest" "mpijob_crd" {
       "subresources" = {
         "status" = {}
       }
+      ## Currently necessary to allow for the variety of configuration options
       "preserveUnknownFields" = "true"
       "validation" = {
         "openAPIV3Schema" = {
@@ -276,6 +281,7 @@ resource "kubernetes_manifest" "mpijob_crd" {
   }
 }
 
+## Manages creation of MPIJobs
 resource "kubernetes_manifest" "deployment_mpi_operator" {
   depends_on = [
     kubernetes_manifest.serviceaccount_mpi_operator
@@ -331,6 +337,7 @@ resource "kubernetes_manifest" "deployment_mpi_operator" {
   }
 }
 
+## Creates a ConfigMap allowing HPL.dat to be added to container
 resource "kubernetes_config_map" "file_mount" {
   depends_on = [
     kubernetes_namespace.mpi_operator

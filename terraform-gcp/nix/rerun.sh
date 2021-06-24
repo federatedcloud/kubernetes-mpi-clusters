@@ -1,6 +1,11 @@
+#!/nix/store/d48wjj8swi562h389yii2jyhm07lmss0-nix-2.3.6/bin/nix-shell
+
+## Removes old MPIJob and reapplies as terraform can't chane it in-place reliably
 cd $HOME/tf-kubernetes
 rm mpijob.tf
 terraform apply -auto-approve
+
+## Copies in new versions and applies
 cp staging/mpijob.tf .
 cp staging/mpi-operator.tf .
 terraform apply -auto-approve

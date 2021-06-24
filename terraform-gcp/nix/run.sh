@@ -1,9 +1,12 @@
+#!/nix/store/d48wjj8swi562h389yii2jyhm07lmss0-nix-2.3.6/bin/nix-shell
+## Creates the cluster and runs the provided MPIJob
 cd $HOME/tf-kubernetes
 
 echo "Creating cluster, nodes"
 terraform init
 terraform apply --auto-approve
 
+## Connects Kubernetes to the cluster
 sleep 10
 source ../nix/gcloud-authn.sh
 
