@@ -1,0 +1,12 @@
+profile          = "tf-kubernetes-sa"
+region           = "us-east-2"
+cluster_name     = "tf-kubernetes"
+num_nodes        = 1
+machine_type     = "n2-standard-4"
+num_workers      = 3
+slots_per_worker = 2
+aws_credentials  = "tf-kubernetes-sa.csv"
+container_name   = "hpl-benchmarks"
+runscript        = "mpirun -np 6 --bind-to core --map-by slot xhpl"
+path_to_file     = "../mpi-files/HPLsmall.dat"
+image_id         = "cornellcac/nix-mpi-benchmarks:a4f3cd63f6994703bbaa0636f4ddbcc87e83ea05"

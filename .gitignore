@@ -29,3 +29,5 @@ override.tf.json
 
 # Ignore google credentials
 *.json
+# Ignore AWS credentials
+*.csv
