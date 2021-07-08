@@ -69,7 +69,7 @@ resource "aws_security_group" "node" {
   }
   tags = {
     "Name" = "terraform-eks-node"
-    "kubernetes.io/cluster/${var.cluster-name}" = "owned"
+    "kubernetes.io/cluster/${var.cluster_name}" = "owned"
   }
 }
 
@@ -148,6 +148,10 @@ resource "aws_launch_configuration" "workers" {
   security_groups             = [aws_security_group.node.id]
   user_data_base64            = base64encode(local.node-userdata)
 
+  root_block_device {
+    volume_size = 40
+  }
+
   lifecycle {
     create_before_destroy = true
   }
@@ -159,7 +163,7 @@ resource "aws_autoscaling_group" "workers" {
   max_size             = var.num_workers
   min_size             = var.num_workers
   name                 = "terraform-eks"
-  vpc_zone_identifier  = aws_subnet.main.0.id
+  vpc_zone_identifier  = [aws_subnet.main.0.id]
 
   tag {
     key                 = "Name"

@@ -34,7 +34,7 @@ variable "runscript" {
 }
 variable "image_id" {
 #  default     = "cornellcac/nix-mpi-benchmarks:a4f3cd63f6994703bbaa0636f4ddbcc87e83ea05"
-  default     = "cornellcac/wrf:3.8.1-fitch@sha256:ee2f88b1db2f72df03fb7627e5f25040caa02100600d7c0105d3e6ad6666ff3f"
+#  default     = "cornellcac/wrf:3.8.1-fitch@sha256:ee2f88b1db2f72df03fb7627e5f25040caa02100600d7c0105d3e6ad6666ff3f"
   description = "docker image for launcher and worker containers"
 }
 variable "num_workers" {

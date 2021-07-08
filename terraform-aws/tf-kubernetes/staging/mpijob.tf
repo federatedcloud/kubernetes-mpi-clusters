@@ -44,13 +44,20 @@ resource "kubernetes_manifest" "mpijob" {
                       "name" = "nfs"
                     },
                   ]
+                  "resources" = {
+                    "requests" = {
+                      "cpu" = "1100m"
+                      "memory" = "2500M"
+                    }
+                  }
                 }
               ]
               "volumes" = [
                 {
                   "name" = "nfs"
-                  "persistentVolumeClaim" = {
-                    "claimName" = "nfs"
+                  "nfs" = {
+                    "server" = "172.20.102.211"
+                    "path" = "/"
                   }
                 }
               ]
@@ -58,7 +65,8 @@ resource "kubernetes_manifest" "mpijob" {
           }
         }
         "Worker" = {
-          "replicas" = var.num_workers
+          ## 2 because mpi images are too bif
+          "replicas" = 2
           "template" = {
             "spec" = {
               "containers" = [
@@ -92,28 +100,28 @@ resource "kubernetes_manifest" "mpijob" {
                   ]
                 },
               ]
-              "initContainers" = [
-                {
-                  "image" = var.image_id
-                  "name" = "wrf-init"
-                  "volumeMounts" = [
-                    {
-                      "mountPath" = "/wrf/data"
-                      "name" = "nfs"
-                    },
-                    {
-                      "mountPath" = "/root/${var.remote_file_name}"
-                      "name" = "cfgmap"
-                      "subPath" = var.remote_file_name
-                    }
-                  ]
-                  "command" = [
-                    "bash",
-                    "-c",
-                    "source /root/${var.remote_file_name}"
-                  ]
-                }
-              ]
+              #"initContainers" = [
+              #  {
+              #   "image" = var.image_id
+              #   "name" = "wrf-init"
+              #   "volumeMounts" = [
+              #     {
+              #       "mountPath" = "/wrf/data"
+              #       "name" = "nfs"
+              #     },
+              #     {
+              #       "mountPath" = "/root/${var.remote_file_name}"
+              #       "name" = "cfgmap"
+              #       "subPath" = var.remote_file_name
+              #     }
+              #   ]
+              #   "command" = [
+              #     "bash",
+              #     "-c",
+              #     "source /root/${var.remote_file_name}"
+              #   ]
+              # }
+              #}
               ## Defines which volumes are accessible to the pod
               "volumes" = [
                 {
@@ -124,8 +132,9 @@ resource "kubernetes_manifest" "mpijob" {
                 },
                 {
                   "name" = "nfs"
-                  "persistentVolumeClaim" = {
-                    "claimName" = "nfs"
+                  "nfs" = {
+                    "server" = "172.20.102.211"
+                    "path" = "/"
                   }
                 }
               ]

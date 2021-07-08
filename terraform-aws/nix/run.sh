@@ -2,10 +2,10 @@
 ## Creates the cluster and runs the provided MPIJob
 cd $HOME/tf-kubernetes
 
-## Connects service account to this container
-aws configure import --csv file://$(terraform output -raw aws_credentials)
+csv=$(cat terraform.tfvars | grep aws_credentials | cut -d "=" -f 2 | xargs)
+aws configure import --csv file://${csv}
 
-echo "Creating cluster, nodes"
+echo "Creating network, cluster, nodes"
 terraform init
 terraform apply --auto-approve
 
@@ -18,11 +18,11 @@ aws eks update-kubeconfig --region $(terraform output -raw region) \
 echo "Creating namespace, service account, clusterrole, clusterrolebinding,"
 echo "mpijob crd, deployment, and configmaps"
 cp staging/mpi-operator.tf .
-#cp staging/aws-auth-map.tf .
+cp staging/aws-auth-map.tf .
 terraform apply --auto-approve
 echo "Adding MPIJob"
-cp staging/mpijob.tf .
-terraform apply --auto-approve
+#cp staging/mpijob.tf .
+#terraform apply --auto-approve
 
 echo "Running MPIJob"
 MPIJOB_NAME=$(terraform output -raw container_name)
