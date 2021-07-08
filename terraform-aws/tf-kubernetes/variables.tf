@@ -12,9 +12,13 @@ variable "cluster_name" {
   default     = "tf-kubernetes"
   description = "name of EKS cluster"
 }
-variable "instance_type" {
+variable "worker_instance_type" {
   default     = "t3.medium"
-  description = "type of AWS VM"
+  description = "type of AWS VM for worker node"
+}
+variable "launcher_instance_type" {
+  default     = "t3.medium"
+  description = "type of AWS VM for launcher node"
 }
 variable "input_file_name" {
   default     = "../mpi-files/WRF-script.sh"
@@ -44,4 +48,7 @@ variable "num_workers" {
 variable "slots_per_worker" {
   default     = 2
   description = "number of mpi slots per worker pod"
+}
+variable "nfs_server_ip" {
+  description = "ClusterIP of nfs server"
 }

@@ -28,7 +28,7 @@ then
 	docker stop tf_kubernetes_aws_container
 	docker rm -f tf_kubernetes_aws_container
 	## Start the container, but just have it sleep so we can `docker exec` into it if necessary
-	docker run --name tf_kubernetes_aws_container $NIX_K8_TF_IMAGE sleep 10000 &
+	docker run --name tf_kubernetes_aws_container $NIX_K8_TF_IMAGE sleep infinity &
 	#sleep 5
 	## Run terraform-kubernetes and copy out the results.
 	#docker exec -t tf_kubernetes_aws_container nix-shell /home/nixuser/nix --run "/home/nixuser/nix/run.sh"

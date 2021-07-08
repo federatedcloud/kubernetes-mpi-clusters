@@ -44,19 +44,16 @@ resource "kubernetes_manifest" "mpijob" {
                       "name" = "nfs"
                     },
                   ]
-                  "resources" = {
-                    "requests" = {
-                      "cpu" = "1100m"
-                      "memory" = "2500M"
-                    }
-                  }
                 }
               ]
+              "nodeSelector" = {
+                "role" = "launcher"
+              }
               "volumes" = [
                 {
                   "name" = "nfs"
                   "nfs" = {
-                    "server" = "172.20.102.211"
+                    "server" = var.nfs_server_ip
                     "path" = "/"
                   }
                 }
@@ -65,27 +62,48 @@ resource "kubernetes_manifest" "mpijob" {
           }
         }
         "Worker" = {
-          ## 2 because mpi images are too bif
-          "replicas" = 2
+          ## 2 because mpi images are too big
+          "replicas" = var.num_workers
           "template" = {
             "spec" = {
+              ## Schedule worker pods to different nodes
+              "affinity" = {
+                "podAntiAffinity" = {
+                  "requiredDuringSchedulingIgnoredDuringExecution" = [
+                    {
+                      "labelSelector" = {
+                        "matchExpressions" = [
+                          {
+                            "key" = "mpi-job-role"
+                            "operator" = "In"
+                            "values" = [
+                              "worker"
+                            ]
+                          }
+                        ]
+                      }
+                      "topologyKey" = "kubernetes.io/hostname"
+                    }
+                  ]
+                }
+              }
               "containers" = [
                 {
                   "image" = var.image_id
                   "name" = var.container_name
                   ## Ensure one worker pod per node
-                  "resources" = {
-                    ## Set limits to be the maximum cpu, memory per node
-                    "limits" = {
-                      "cpu" = "2"
-                      "memory" = "4G"
-                    }
-                    ## Set requests to be just over half of cpu, memory per node
-                    "requests" = {
-                      "cpu" = "1100m"
-                      "memory" = "1500M"
-                    }
-                  }
+                  #"resources" = {
+                  #  ## Set limits to be the maximum cpu, memory per node
+                  #  "limits" = {
+                  #    "cpu" = "2"
+                  #    "memory" = "4G"
+                  #  }
+                  #  ## Set requests to be just over half of cpu, memory per node
+                  #  "requests" = {
+                  #    "cpu" = "1100m"
+                  #    "memory" = "1500M"
+                  #  }
+                  #}
                   ## Defines which volumes to mount for this container and where
                   "volumeMounts" = [
                     {
@@ -122,6 +140,10 @@ resource "kubernetes_manifest" "mpijob" {
               #   ]
               # }
               #}
+              ## Puts workers pods on worker nodes
+              "nodeSelector" = {
+                "role" = "worker"
+              }
               ## Defines which volumes are accessible to the pod
               "volumes" = [
                 {
@@ -133,7 +155,7 @@ resource "kubernetes_manifest" "mpijob" {
                 {
                   "name" = "nfs"
                   "nfs" = {
-                    "server" = "172.20.102.211"
+                    "server" = var.nfs_server_ip
                     "path" = "/"
                   }
                 }

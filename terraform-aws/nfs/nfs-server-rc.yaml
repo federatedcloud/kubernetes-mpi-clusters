@@ -32,10 +32,10 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
               - matchExpressions:
-                  - key: nfs
+                  - key: role
                     operator: In
                     values:
-                      - mounted
+                      - launcher
       volumes:
         - name: mypvc
           persistentVolumeClaim:

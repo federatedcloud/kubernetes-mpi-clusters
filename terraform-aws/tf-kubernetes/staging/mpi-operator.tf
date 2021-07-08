@@ -328,6 +328,9 @@ resource "kubernetes_manifest" "deployment_mpi_operator" {
             },
           ]
           "serviceAccountName" = "mpi-operator"
+          "nodeSelector" = {
+            "role" = "launcher"
+          }
         }
       }
     }

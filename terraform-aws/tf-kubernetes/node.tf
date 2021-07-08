@@ -132,21 +132,32 @@ data "aws_region" "current" {}
 # information into the AutoScaling Launch Configuration.
 # More information: https://docs.aws.amazon.com/eks/latest/userguide/launch-workers.html
 locals {
-  node-userdata = <<USERDATA
+  node-userdata-worker = <<USERDATAWORKER
 #!/bin/bash
 set -o xtrace
-/etc/eks/bootstrap.sh --apiserver-endpoint '${aws_eks_cluster.main.endpoint}' --b64-cluster-ca '${aws_eks_cluster.main.certificate_authority.0.data}' '${var.cluster_name}'
-USERDATA
+/etc/eks/bootstrap.sh --kubelet-extra-args '--node-labels=role=worker' \
+                      --apiserver-endpoint '${aws_eks_cluster.main.endpoint}' \
+                      --b64-cluster-ca '${aws_eks_cluster.main.certificate_authority.0.data}' \
+                      '${var.cluster_name}'
+USERDATAWORKER
+  node-userdata-launcher = <<USERDATALAUNCHER
+#!/bin/bash
+set -o xtrace                                                              
+/etc/eks/bootstrap.sh --kubelet-extra-args '--node-labels=role=launcher' \
+                      --apiserver-endpoint '${aws_eks_cluster.main.endpoint}' \
+                      --b64-cluster-ca '${aws_eks_cluster.main.certificate_authority.0.data}' \
+                      '${var.cluster_name}'
+USERDATALAUNCHER
 }
 
 resource "aws_launch_configuration" "workers" {
   associate_public_ip_address = true
   iam_instance_profile        = aws_iam_instance_profile.node.name
   image_id                    = data.aws_ami.eks-worker.id
-  instance_type               = var.instance_type
-  name_prefix                 = "terraform-eks"
+  instance_type               = var.worker_instance_type
+  name_prefix                 = "terraform-eks-worker"
   security_groups             = [aws_security_group.node.id]
-  user_data_base64            = base64encode(local.node-userdata)
+  user_data_base64            = base64encode(local.node-userdata-worker)
 
   root_block_device {
     volume_size = 40
@@ -162,15 +173,53 @@ resource "aws_autoscaling_group" "workers" {
   launch_configuration = aws_launch_configuration.workers.id
   max_size             = var.num_workers
   min_size             = var.num_workers
-  name                 = "terraform-eks"
+  name                 = "terraform-eks-worker"
   vpc_zone_identifier  = [aws_subnet.main.0.id]
 
   tag {
     key                 = "Name"
-    value               = "terraform-eks"
+    value               = "terraform-eks-worker"
     propagate_at_launch = true
   }
 
+  tag {
+    key                 = "kubernetes.io/cluster/${var.cluster_name}"
+    value               = "owned"
+    propagate_at_launch = true
+  }
+}
+
+resource "aws_launch_configuration" "launcher" {
+  associate_public_ip_address = true
+  iam_instance_profile        = aws_iam_instance_profile.node.name
+  image_id                    = data.aws_ami.eks-worker.id
+  instance_type               = var.launcher_instance_type
+  name_prefix                 = "terraform-eks"
+  security_groups             = [aws_security_group.node.id]
+  user_data_base64            = base64encode(local.node-userdata-launcher)
+
+  root_block_device {
+    volume_size = 40
+  }
+  
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_autoscaling_group" "launcher" {
+  desired_capacity     = 1
+  launch_configuration = aws_launch_configuration.launcher.id
+  max_size             = 1
+  min_size             = 1
+  name                 = "terraform-eks-launcher"
+  vpc_zone_identifier  = [aws_subnet.main.0.id]
+
+  tag {
+    key                 = "Name"
+    value               = "terraform-eks-launcher"
+    propagate_at_launch = true
+  }
   tag {
     key                 = "kubernetes.io/cluster/${var.cluster_name}"
     value               = "owned"

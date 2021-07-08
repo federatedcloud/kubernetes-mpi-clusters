@@ -6,6 +6,7 @@ USER $nixuser
 COPY tf-kubernetes $HOME/tf-kubernetes
 COPY nix $HOME/nix
 COPY mpi-files $HOME/mpi-files
+COPY nfs $HOME/nfs
 USER root 
 
 #RUN echo $nixuser
