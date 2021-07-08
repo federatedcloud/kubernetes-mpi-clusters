@@ -1,5 +1,5 @@
 #FROM cornellcac/nix_alpine_base:0f566286984d3565f89262acb3186483832bdae8
-FROM nix_alpine_base:148ef8f386bd8b4e8c5a084eb522eb2366bc4f88_testing
+FROM nix_alpine_base:1eceb63b86312787b7ead2077687fc65eb732494
 USER $nixuser 
 
 #Adding ansible and terraform files 

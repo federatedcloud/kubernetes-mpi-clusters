@@ -1,8 +1,5 @@
 ## Creates namespace to put all mpi-operator resources in
 resource "kubernetes_namespace" "mpi_operator" {
-  depends_on = [
-    google_container_node_pool.primary_nodes
-  ]
   metadata {
     name = "mpi-operator"
   }
@@ -348,6 +345,6 @@ resource "kubernetes_config_map" "file_mount" {
   }
 
   data = {
-    "HPL.dat" = "${file("${path.root}/${var.path_to_file}")}"
+    "${var.remote_file_name}" = "${file("${path.root}/${var.input_file_name}")}"
   }
 }

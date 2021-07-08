@@ -18,10 +18,7 @@ then
 	    
 	    echo "$tag"
 	}
-	## Uncomment to test from command line:
-	#git_image_tag
-	
-	# Docker image tagging
+	## Docker image tagging
 	NAME="nix_tf_kubernetes_image_aws"
 	TAG=$(git_image_tag)
 	export NIX_K8_TF_IMAGE="${NAME}:${TAG}"
@@ -32,7 +29,7 @@ then
 	docker rm -f tf_kubernetes_aws_container
 	## Start the container, but just have it sleep so we can `docker exec` into it if necessary
 	docker run --name tf_kubernetes_aws_container $NIX_K8_TF_IMAGE sleep 10000 &
-	sleep 5
+	#sleep 5
 	## Run terraform-kubernetes and copy out the results.
 	#docker exec -t tf_kubernetes_aws_container nix-shell /home/nixuser/nix --run "/home/nixuser/nix/run.sh"
 	#docker cp tf_kubernetes_aws_container:/home/nixuser/results.txt results/${RUNNAME}.txt

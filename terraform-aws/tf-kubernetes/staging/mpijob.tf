@@ -24,15 +24,35 @@ resource "kubernetes_manifest" "mpijob" {
                   ## Ensures commands are running in proper environment
                   ## May want to change the last line
                   "command" = [
-                    "su",
-                    "nixuser",
+                  #  "su",
+                  #  "nixuser",
+                  #  "-c",
+                  #  "nix-shell dev.nix --run 'cd ~; ${var.runscript}'"
+                  #  "bash -c '${var.runscript}'"
+                    "bash"
+                  ]
+                  "args" = [
                     "-c",
-                    "nix-shell dev.nix --run 'cd ~; ${var.runscript}'"
+                    "${var.runscript}"
                   ]
                   ## Not sure if this image needs to match Worker image
                   "image" = var.image_id
                   "name" = var.container_name
-                },
+                  "volumeMounts" = [
+                    {
+                      "mountPath" = "/wrf/data"
+                      "name" = "nfs"
+                    },
+                  ]
+                }
+              ]
+              "volumes" = [
+                {
+                  "name" = "nfs"
+                  "persistentVolumeClaim" = {
+                    "claimName" = "nfs"
+                  }
+                }
               ]
             }
           }
@@ -49,24 +69,50 @@ resource "kubernetes_manifest" "mpijob" {
                   "resources" = {
                     ## Set limits to be the maximum cpu, memory per node
                     "limits" = {
-                      "cpu" = "4"
-                      "memory" = "15G"
+                      "cpu" = "2"
+                      "memory" = "4G"
                     }
                     ## Set requests to be just over half of cpu, memory per node
                     "requests" = {
-                      "cpu" = "2500m"
-                      "memory" = "10G"
+                      "cpu" = "1100m"
+                      "memory" = "1500M"
                     }
                   }
                   ## Defines which volumes to mount for this container and where
                   "volumeMounts" = [
                     {
-                      "mountPath" = "/home/nixuser/HPL.dat"
+                      "mountPath" = "/wrf/data"
+                      "name" = "nfs"
+                    },
+                    {
+                      "mountPath" = "/root/${var.remote_file_name}"
                       "name" = "cfgmap"
-                      "subPath" = "HPL.dat"
+                      "subPath" = var.remote_file_name
                     }
                   ]
                 },
+              ]
+              "initContainers" = [
+                {
+                  "image" = var.image_id
+                  "name" = "wrf-init"
+                  "volumeMounts" = [
+                    {
+                      "mountPath" = "/wrf/data"
+                      "name" = "nfs"
+                    },
+                    {
+                      "mountPath" = "/root/${var.remote_file_name}"
+                      "name" = "cfgmap"
+                      "subPath" = var.remote_file_name
+                    }
+                  ]
+                  "command" = [
+                    "bash",
+                    "-c",
+                    "source /root/${var.remote_file_name}"
+                  ]
+                }
               ]
               ## Defines which volumes are accessible to the pod
               "volumes" = [
@@ -74,6 +120,12 @@ resource "kubernetes_manifest" "mpijob" {
                   "name" = "cfgmap"
                   "configMap" = {
                     "name" = "cfgmap-file-mount"
+                  }
+                },
+                {
+                  "name" = "nfs"
+                  "persistentVolumeClaim" = {
+                    "claimName" = "nfs"
                   }
                 }
               ]
