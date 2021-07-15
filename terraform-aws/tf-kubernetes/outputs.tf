@@ -30,3 +30,7 @@ output "profile" {
 output "container_name" {
   value = var.container_name
 }
+output "ssh_private_key" {
+  value = tls_private_key.nodes.private_key_pem
+  sensitive = "true"
+}

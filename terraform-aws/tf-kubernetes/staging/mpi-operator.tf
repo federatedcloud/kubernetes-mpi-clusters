@@ -328,26 +328,12 @@ resource "kubernetes_manifest" "deployment_mpi_operator" {
             },
           ]
           "serviceAccountName" = "mpi-operator"
+          ## Puts mpi-operator pod on launcher node
           "nodeSelector" = {
             "role" = "launcher"
           }
         }
       }
     }
-  }
-}
-
-## Creates a ConfigMap allowing HPL.dat to be added to container
-resource "kubernetes_config_map" "file_mount" {
-  depends_on = [
-    kubernetes_namespace.mpi_operator
-  ]
-  metadata {
-    name = "cfgmap-file-mount"
-    namespace = "mpi-operator"
-  }
-
-  data = {
-    "${var.remote_file_name}" = "${file("${path.root}/${var.input_file_name}")}"
   }
 }

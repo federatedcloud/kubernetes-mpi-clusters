@@ -61,6 +61,20 @@ resource "aws_security_group" "node" {
     protocol = "icmp"
     description = "ping"
   }
+  ingress {
+    cidr_blocks = ["10.0.0.0/16"]
+    from_port = 53
+    to_port = 53
+    protocol = "udp"
+    description = "dns"
+  }
+  ingress {
+    cidr_blocks = ["10.0.0.0/16"]
+    from_port = 1025
+    to_port = 65535
+    protocol = "udp"
+    description = "dns"
+  }
   egress {
     from_port = 0
     to_port = 0
@@ -73,46 +87,6 @@ resource "aws_security_group" "node" {
   }
 }
 
-#resource "aws_security_group_rule" "node-ingress-self" {
-#  description              = "Allow node to communicate with each other"
-#  from_port                = 0
-#  protocol                 = "-1"
-#  security_group_id        = aws_security_group.node.id
-#  source_security_group_id = aws_security_group.node.id
-#  to_port                  = 65535
-#  type                     = "ingress"
-#}
-#
-#resource "aws_security_group_rule" "node-ingress-cluster-https" {
-#  description              = "Allow worker Kubelets and pods to receive communication from the cluster control plane"
-#  from_port                = 443
-#  protocol                 = "tcp"
-#  security_group_id        = aws_security_group.node.id
-#  source_security_group_id = aws_security_group.cluster.id
-#  to_port                  = 443
-#  type                     = "ingress"
-#}
-#
-#resource "aws_security_group_rule" "node-ingress-cluster-others" {
-#  description              = "Allow worker Kubelets and pods to receive communication from the cluster control plane"
-#  from_port                = 1025
-#  protocol                 = "tcp"
-#  security_group_id        = aws_security_group.node.id
-#  source_security_group_id = aws_security_group.cluster.id
-#  to_port                  = 65535
-#  type                     = "ingress"
-#}
-
-resource "aws_security_group_rule" "cluster-ingress-node-https" {
-  description              = "Allow pods to communicate with the cluster API Server"
-  from_port                = 443
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.cluster.id
-  source_security_group_id = aws_security_group.node.id
-  to_port                  = 443
-  type                     = "ingress"
-}
-
 data "aws_ami" "eks-worker" {
   filter {
     name   = "name"
@@ -120,6 +94,15 @@ data "aws_ami" "eks-worker" {
   }
   most_recent = true
   owners      = ["602401143452"] # Amazon EKS AMI Account ID
+}
+
+resource "tls_private_key" "nodes" {
+  algorithm = "RSA"
+}
+
+resource "aws_key_pair" "generated" {
+  key_name    = "${var.cluster_name}-key"
+  public_key  = tls_private_key.nodes.public_key_openssh
 }
 
 # This data source is included for ease of sample architecture deployment
@@ -155,12 +138,13 @@ resource "aws_launch_configuration" "workers" {
   iam_instance_profile        = aws_iam_instance_profile.node.name
   image_id                    = data.aws_ami.eks-worker.id
   instance_type               = var.worker_instance_type
+  key_name                    = aws_key_pair.generated.key_name
   name_prefix                 = "terraform-eks-worker"
   security_groups             = [aws_security_group.node.id]
   user_data_base64            = base64encode(local.node-userdata-worker)
 
   root_block_device {
-    volume_size = 40
+    volume_size = 100
   }
 
   lifecycle {
@@ -194,12 +178,13 @@ resource "aws_launch_configuration" "launcher" {
   iam_instance_profile        = aws_iam_instance_profile.node.name
   image_id                    = data.aws_ami.eks-worker.id
   instance_type               = var.launcher_instance_type
+  key_name                    = aws_key_pair.generated.key_name
   name_prefix                 = "terraform-eks"
   security_groups             = [aws_security_group.node.id]
   user_data_base64            = base64encode(local.node-userdata-launcher)
 
   root_block_device {
-    volume_size = 40
+    volume_size = 50
   }
   
   lifecycle {

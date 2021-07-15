@@ -20,14 +20,6 @@ variable "launcher_instance_type" {
   default     = "t3.medium"
   description = "type of AWS VM for launcher node"
 }
-variable "input_file_name" {
-  default     = "../mpi-files/WRF-script.sh"
-  description = "local location of script added to worker nodes"
-}
-variable "remote_file_name" {
-  default     = "WRF-script.sh"
-  description = "where on worker nodes script is added"
-}
 variable "container_name" {
   default     = "wrf"
   description = "name of mpijob-related resources"
