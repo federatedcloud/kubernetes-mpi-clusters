@@ -87,6 +87,16 @@ resource "aws_security_group" "node" {
   }
 }
 
+resource "aws_security_group_rule" "cluster-ingress-node-https" {
+  description              = "Allow pods to communicate with the cluster API Server"
+  from_port                = 443
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.cluster.id
+  source_security_group_id = aws_security_group.node.id
+  to_port                  = 443
+  type                     = "ingress"
+}
+
 data "aws_ami" "eks-worker" {
   filter {
     name   = "name"
@@ -126,7 +136,7 @@ USERDATAWORKER
   node-userdata-launcher = <<USERDATALAUNCHER
 #!/bin/bash
 set -o xtrace                                                              
-/etc/eks/bootstrap.sh --kubelet-extra-args '--node-labels=role=launcher' \
+/etc/eks/bootstrap.sh --kubelet-extra-args '--node-labels=role=launcher --feature-gates=SizeMemoryBackedVolumes=true' \
                       --apiserver-endpoint '${aws_eks_cluster.main.endpoint}' \
                       --b64-cluster-ca '${aws_eks_cluster.main.certificate_authority.0.data}' \
                       '${var.cluster_name}'
