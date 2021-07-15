@@ -128,7 +128,7 @@ locals {
   node-userdata-worker = <<USERDATAWORKER
 #!/bin/bash
 set -o xtrace
-/etc/eks/bootstrap.sh --kubelet-extra-args '--node-labels=role=worker' \
+/etc/eks/bootstrap.sh --kubelet-extra-args '--node-labels=role=worker --feature-gates=SizeMemoryBackedVolumes=true' \
                       --apiserver-endpoint '${aws_eks_cluster.main.endpoint}' \
                       --b64-cluster-ca '${aws_eks_cluster.main.certificate_authority.0.data}' \
                       '${var.cluster_name}'
@@ -136,7 +136,7 @@ USERDATAWORKER
   node-userdata-launcher = <<USERDATALAUNCHER
 #!/bin/bash
 set -o xtrace                                                              
-/etc/eks/bootstrap.sh --kubelet-extra-args '--node-labels=role=launcher --feature-gates=SizeMemoryBackedVolumes=true' \
+/etc/eks/bootstrap.sh --kubelet-extra-args '--node-labels=role=launcher' \
                       --apiserver-endpoint '${aws_eks_cluster.main.endpoint}' \
                       --b64-cluster-ca '${aws_eks_cluster.main.certificate_authority.0.data}' \
                       '${var.cluster_name}'
