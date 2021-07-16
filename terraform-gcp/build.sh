@@ -22,7 +22,7 @@ then
 	#git_image_tag
 	
 	# Docker image tagging
-	NAME="nix_tf_kubernetes_image_aws"
+	NAME="nix_tf_kubernetes_image_gcp"
 	TAG=$(git_image_tag)
 	export NIX_K8_TF_IMAGE="${NAME}:${TAG}"
 	echo "NIX_K8_TF_IMAGE is $NIX_K8_TF_IMAGE"
