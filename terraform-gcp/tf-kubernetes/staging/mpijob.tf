@@ -97,9 +97,7 @@ resource "kubernetes_manifest" "mpijob" {
                   "name" = "dshm"
                   "emptyDir" = {
                     "medium" = "Memory"
-                    ## Can't set sizeLimit without setting SizeMemoryBackedVolumes feature gate
-                    ## No GKE cluster plane version supporting it as of 7/16/21
-                    #"sizeLimit" = "11Gi"
+                    "sizeLimit" = "11Gi"
                   }
                 }
               ]

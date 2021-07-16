@@ -16,7 +16,7 @@ data "google_container_engine_versions" "versions" {
   provider       = google-beta
   project        = var.project_id
   location       = var.zonal_cluster ? var.zone : var.region
-  version_prefix = "1.19."
+  version_prefix = "1.20."
 }
 
 ## Create GKE Cluster
@@ -25,11 +25,26 @@ resource "google_container_cluster" "primary" {
   location = var.zonal_cluster ? var.zone : var.region
   ## Removing default node pool gives more control over nodes
   remove_default_node_pool = true
-  initial_node_count       = 1
+  #initial_node_count       = 1
   ## Ensure stable kubernetes version
-  min_master_version = data.google_container_engine_versions.versions.release_channel_default_version["STABLE"]
+  #min_master_version = data.google_container_engine_versions.versions.release_channel_default_version["RAPID"]
+  min_master_version = "1.20.7-gke.1800"
+  enable_kubernetes_alpha = true
   release_channel {
-    channel = "STABLE"
+    channel = "UNSPECIFIED"
+  }
+  node_pool {
+    name = "default-pool"
+    initial_node_count = 1
+    management {
+      auto_repair = false
+      auto_upgrade = false
+    }
+  }
+  lifecycle {
+    ignore_changes = [
+      node_pool
+    ]
   }
 
   network    = google_compute_network.vpc.name
@@ -41,7 +56,13 @@ resource "google_container_node_pool" "launcher_node" {
   name     = "${google_container_cluster.primary.name}-launcher-node-pool"
   location = var.zonal_cluster ? var.zone : var.region
   cluster  = google_container_cluster.primary.name
-  version  = data.google_container_engine_versions.versions.release_channel_default_version["STABLE"]
+  #version  = data.google_container_engine_versions.versions.release_channel_default_version["RAPID"]
+  version  = "1.20.7-gke.1800"
+
+  management {
+    auto_repair  = false
+    auto_upgrade = false
+  }
 
   node_count     = 1
   node_locations = [ var.zone ]
@@ -71,10 +92,15 @@ resource "google_container_node_pool" "worker_nodes" {
   name     = "${google_container_cluster.primary.name}-worker-node-pool"
   location = var.zonal_cluster ? var.zone : var.region
   cluster  = google_container_cluster.primary.name
+  #version    = data.google_container_engine_versions.versions.release_channel_default_version["RAPID"]
+  version  = "1.20.7-gke.1800"
+ 
+  management {
+    auto_repair  = false
+    auto_upgrade = false
+  }
 
   node_count = var.gke_nodes_per_zone
-  version    = data.google_container_engine_versions.versions.release_channel_default_version["STABLE"]
-
   node_config {
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
