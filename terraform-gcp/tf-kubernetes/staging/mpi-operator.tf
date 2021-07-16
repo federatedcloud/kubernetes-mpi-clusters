@@ -1,7 +1,8 @@
 ## Creates namespace to put all mpi-operator resources in
 resource "kubernetes_namespace" "mpi_operator" {
   depends_on = [
-    google_container_node_pool.primary_nodes
+    google_container_node_pool.launcher_node,
+    google_container_node_pool.worker_nodes
   ]
   metadata {
     name = "mpi-operator"
@@ -331,6 +332,10 @@ resource "kubernetes_manifest" "deployment_mpi_operator" {
             },
           ]
           "serviceAccountName" = "mpi-operator"
+          ## Puts mpi-operator pod on launcher node
+          "nodeSelector" = {
+            "role" = "launcher"
+          }
         }
       }
     }

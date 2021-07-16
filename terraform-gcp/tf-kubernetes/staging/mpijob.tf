@@ -14,7 +14,6 @@ resource "kubernetes_manifest" "mpijob" {
     "spec" = {
       "cleanPodPolicy" = "Running"
       "mpiReplicaSpecs" = {
-        ## Consider using NodeAffinity and second node pool to free resources
         "Launcher" = {
           "replicas" = 1
           "template" = {
@@ -34,6 +33,9 @@ resource "kubernetes_manifest" "mpijob" {
                   "name" = var.container_name
                 },
               ]
+              "nodeSelector" = {
+                "role" = "launcher"
+              }
             }
           }
         }
@@ -41,39 +43,63 @@ resource "kubernetes_manifest" "mpijob" {
           "replicas" = var.num_workers
           "template" = {
             "spec" = {
+              ## Schedule worker pods to different nodes
+              "affinity" = {
+                "podAntiAffinity" = {
+                  "requiredDuringSchedulingIgnoredDuringExecution" = [
+                    {
+                      "labelSelector" = {
+                        "matchExpressions" = [
+                          {
+                            "key" = "mpi-job-role"
+                            "operator" = "In"
+                            "values" = [
+                              "worker"
+                            ] 
+                          }
+                        ]
+                      }
+                      "topologyKey" = "kubernetes.io/hostname"
+                    }
+                  ]
+                }
+              }
               "containers" = [
                 {
                   "image" = var.image_id
                   "name" = var.container_name
-                  ## Ensure one worker pod per node
-                  "resources" = {
-                    ## Set limits to be the maximum cpu, memory per node
-                    "limits" = {
-                      "cpu" = "4"
-                      "memory" = "15G"
-                    }
-                    ## Set requests to be just over half of cpu, memory per node
-                    "requests" = {
-                      "cpu" = "2500m"
-                      "memory" = "10G"
-                    }
-                  }
                   ## Defines which volumes to mount for this container and where
                   "volumeMounts" = [
                     {
                       "mountPath" = "/home/nixuser/HPL.dat"
                       "name" = "cfgmap"
                       "subPath" = "HPL.dat"
+                    },
+                    {
+                      "mountPath" = "/dev/shm"
+                      "name" = "dshm"
                     }
                   ]
                 },
               ]
+              "nodeSelector" = {
+                "role" = "worker"
+              }
               ## Defines which volumes are accessible to the pod
               "volumes" = [
                 {
                   "name" = "cfgmap"
                   "configMap" = {
                     "name" = "cfgmap-file-mount"
+                  }
+                },
+                {
+                  "name" = "dshm"
+                  "emptyDir" = {
+                    "medium" = "Memory"
+                    ## Can't set sizeLimit without setting SizeMemoryBackedVolumes feature gate
+                    ## No GKE cluster plane version supporting it as of 7/16/21
+                    #"sizeLimit" = "11Gi"
                   }
                 }
               ]

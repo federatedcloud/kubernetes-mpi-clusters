@@ -30,9 +30,13 @@ variable "google_credentials" {
   description = "path to google credentials file inside container"
 }
 
-variable "machine_type" {
+variable "launcher_machine_type" {
   default     = "n1-standard-1"
-  description = "virtual machine type"
+  description = "machine type for launcher pod"
+}
+variable "worker_machine_type" {
+  default     = "n1-standard-1"
+  description = "machine type for worker pods"
 }
 
 variable "num_workers" {
