@@ -11,7 +11,6 @@ stdenv.mkDerivation {
   # terraform and kubernetes required packages
   awscli2
   kubectl
-  jq
   ];
   src = null; 
 }
