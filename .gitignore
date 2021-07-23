@@ -27,7 +27,7 @@ override.tf.json
 # Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
 # example: *tfplan*
 
-# Ignore google credentials
+# Ignore google and azure credentials
 *.json
 # Ignore AWS credentials
 *.csv
