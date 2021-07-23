@@ -31,7 +31,7 @@ then
 	docker run --name tf_kubernetes_container_aws $NIX_K8_TF_IMAGE sleep 100000 &
 	#sleep 5
 	## Run terraform-kubernetes and copy out the results.
-	#docker exec -t tf_kubernetes_container_aws nix-shell /home/nixuser/nix --run "/home/nixuser/nix/run.sh"
+	#docker exec -t tf_kubernetes_container_aws nix-shell --run "/home/nixuser/nix/run.sh"
 	#docker cp tf_kubernetes_container_aws:/home/nixuser/results.txt results/${RUNNAME}.txt
 else
 	echo Please title run
