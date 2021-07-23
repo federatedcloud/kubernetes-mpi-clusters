@@ -95,7 +95,7 @@ resource "kubernetes_manifest" "mpijob" {
                   ]
                 },
               ]
-              ## Puts workers pods on worker nodes
+              ## Puts worker pods on worker nodes
               "nodeSelector" = {
                 "role" = "worker"
               }

@@ -1,19 +1,18 @@
-resource "aws_iam_role" "node" {
-  name = "terraform-eks-node"
-  assume_role_policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
+data "aws_iam_policy_document" "node" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
     }
-  ]
+  }
 }
-POLICY
+
+resource "aws_iam_role" "node" {
+  assume_role_policy = data.aws_iam_policy_document.node.json
+  name               = "terraform-eks-node"
 }
 
 resource "aws_iam_role_policy_attachment" "node-AmazonEKSWorkerNodePolicy" {
@@ -53,6 +52,7 @@ resource "aws_security_group" "node" {
     to_port = 65535 
     protocol = "tcp"
     description = "internal access"
+    self = true
   }
   ingress {
     cidr_blocks = ["10.0.0.0/16"]
@@ -143,7 +143,7 @@ set -o xtrace
 USERDATALAUNCHER
 }
 
-resource "aws_launch_configuration" "workers" {
+resource "aws_launch_configuration" "worker" {
   associate_public_ip_address = true
   iam_instance_profile        = aws_iam_instance_profile.node.name
   image_id                    = data.aws_ami.eks-worker.id
@@ -162,9 +162,9 @@ resource "aws_launch_configuration" "workers" {
   }
 }
 
-resource "aws_autoscaling_group" "workers" {
+resource "aws_autoscaling_group" "worker" {
   desired_capacity     = var.num_workers
-  launch_configuration = aws_launch_configuration.workers.id
+  launch_configuration = aws_launch_configuration.worker.id
   max_size             = var.num_workers
   min_size             = var.num_workers
   name                 = "terraform-eks-worker"

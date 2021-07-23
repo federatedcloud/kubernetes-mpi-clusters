@@ -1,20 +1,18 @@
 ## Create cluster role
+data "aws_iam_policy_document" "cluster" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
+    
+    principals {
+      type        = "Service"
+      identifiers = ["eks.amazonaws.com"]
+    }
+  }
+}
 resource "aws_iam_role" "cluster" {
   name = "terraform-eks-cluster"
-  assume_role_policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "eks.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-POLICY
+  assume_role_policy = data.aws_iam_policy_document.cluster.json
 }
 
 resource "aws_iam_role_policy_attachment" "cluster-AmazonEKSClusterPolicy" {
@@ -29,7 +27,7 @@ resource "aws_iam_role_policy_attachment" "cluster-AmazonEKSServicePolicy" {
 
 ## Create cluster security group
 resource "aws_security_group" "cluster" {
-  name        = "terraform-ekso-cluster"
+  name        = "terraform-eks-cluster"
   description = "Cluster communication with worker nodes"
   vpc_id      = aws_vpc.main.id
 
