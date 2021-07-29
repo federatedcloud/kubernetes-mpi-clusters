@@ -112,7 +112,7 @@ resource "kubernetes_manifest" "mpijob" {
                   "name" = "dshm"
                   "emptyDir" = {
                     "medium" = "Memory"
-                    "sizeLimit" = "15Gi"
+                    "sizeLimit" = "64Gi"
                   }
                 }
               ]

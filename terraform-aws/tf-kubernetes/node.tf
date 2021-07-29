@@ -128,6 +128,8 @@ locals {
   node-userdata-worker = <<USERDATAWORKER
 #!/bin/bash
 set -o xtrace
+jq -c '."default-ulimits" += { "stack": { "Hard": -1, "Name": "stack", "Soft": -1}}' /etc/docker/daemon.json > /home/ec2-user/daemon.json
+mv /home/ec2-user/daemon.json /etc/docker/daemon.json
 /etc/eks/bootstrap.sh --kubelet-extra-args '--node-labels=role=worker --feature-gates=SizeMemoryBackedVolumes=true' \
                       --apiserver-endpoint '${aws_eks_cluster.main.endpoint}' \
                       --b64-cluster-ca '${aws_eks_cluster.main.certificate_authority.0.data}' \
@@ -136,6 +138,8 @@ USERDATAWORKER
   node-userdata-launcher = <<USERDATALAUNCHER
 #!/bin/bash
 set -o xtrace                                                              
+jq -c '."default-ulimits" += { "stack": { "Hard": -1, "Name": "stack", "Soft": -1}}' /etc/docker/daemon.json > /home/ec2-user/daemon.json
+mv /home/ec2-user/daemon.json /etc/docker/daemon.json
 /etc/eks/bootstrap.sh --kubelet-extra-args '--node-labels=role=launcher' \
                       --apiserver-endpoint '${aws_eks_cluster.main.endpoint}' \
                       --b64-cluster-ca '${aws_eks_cluster.main.certificate_authority.0.data}' \
