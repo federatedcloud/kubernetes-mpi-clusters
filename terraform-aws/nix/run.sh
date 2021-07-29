@@ -2,11 +2,11 @@
 ## Creates the cluster and runs the provided MPIJob
 cd $HOME/tf-kubernetes
 
-csv=$(cat terraform.tfvars | grep aws_credentials | cut -d "=" -f 2 | xargs)
-aws configure import --csv file://${csv}
+terraform init
+terraform refresh -target=var.aws_credentials -compact-warnings
+aws configure import --csv file://$(terraform output -raw aws_credentials)
 
 echo "Creating network, cluster, nodes"
-terraform init
 terraform apply --auto-approve
 
 ## Connects Kubernetes to the cluster
