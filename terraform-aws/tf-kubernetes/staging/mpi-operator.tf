@@ -1,5 +1,6 @@
 ## Creates namespace to put all mpi-operator resources in
 resource "kubernetes_namespace" "mpi_operator" {
+  depends_on = [ kubernetes_config_map.aws_auth ]
   metadata {
     name = "mpi-operator"
   }

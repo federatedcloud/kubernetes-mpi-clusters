@@ -31,7 +31,7 @@ variable "container_name" {
   default     = "wrf"
   description = "name of mpijob-related resources"
 }
-variable "runscript" {
+variable "runscript_file" {
   type        = string
   default     = "echo Hello World"
   description = "command for launcher node to run"

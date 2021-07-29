@@ -24,7 +24,7 @@ resource "kubernetes_manifest" "mpijob" {
                   ]
                   "args" = [
                     "-c",
-                    "${var.runscript}"
+                    "${file(var.runscript_file)}"
                   ]
                   ## Not sure if this image needs to match Worker image
                   "image" = var.image_id
@@ -34,6 +34,16 @@ resource "kubernetes_manifest" "mpijob" {
                       "mountPath" = "/opt/wrf/data"
                       "name" = "nfs"
                     },
+                  ]
+                  "env" = [
+                    {
+                      "name" = "OMP_STACKSIZE"
+                      "value" = "96G"
+                    },
+                    {
+                      "name" = "KMP_STACKSIZE"
+                      "value" = "96G"
+                    }
                   ]
                 }
               ]
@@ -93,7 +103,17 @@ resource "kubernetes_manifest" "mpijob" {
                       "name" = "dshm"
                     }
                   ]
-                },
+                  "env" = [                                            
+                    {                                                  
+                      "name" = "OMP_STACKSIZE"                         
+                      "value" = "96G"                                  
+                    },                                                 
+                    {                                                  
+                      "name" = "KMP_STACKSIZE"                          
+                      "value" = "96G"                                  
+                    }                                                  
+                  ]
+                }
               ]
               ## Puts worker pods on worker nodes
               "nodeSelector" = {
