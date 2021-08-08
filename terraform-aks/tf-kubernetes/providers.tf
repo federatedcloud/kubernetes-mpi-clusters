@@ -21,8 +21,3 @@ provider "azurerm" {
   client_secret   = local.sp_cred.password
   tenant_id       = local.sp_cred.tenant
 }
-
-resource "azurerm_resource_group" "main" {
-  name     = "tf-kubernetes"
-  location = "East US"
-}

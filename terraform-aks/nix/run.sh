@@ -2,6 +2,10 @@
 ## Creates the cluster and runs the provided MPIJob
 cd $HOME/tf-kubernetes
 
+az login --service-principal \
+  -u $(jq .appId sp-cred.json) \
+  -p $(jq .password sp-cred.json) \
+  --tenant $(jq .tenant sp-cred.json)
 
 echo "Creating network, cluster, nodes"
 terraform init
@@ -9,9 +13,8 @@ terraform apply --auto-approve
 
 ## Connects Kubernetes to the cluster
 sleep 10
-aws eks update-kubeconfig --region $(terraform output -raw region) \
-	--name $(terraform output -raw cluster_name) \
-	--profile $(terraform output -raw profile)
+az aks get-credential --resource-group $(terraform output resource_group_name -raw) 
+  --name $(terraform output -raw cluster_name)
 
 ## Add metrics logging
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
@@ -19,14 +22,13 @@ kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/late
 echo "Creating namespace, service account, clusterrole, clusterrolebinding,"
 echo "mpijob crd, deployment, and configmaps"
 cp staging/mpi-operator.tf .
-cp staging/aws-auth-map.tf .
 terraform apply --auto-approve
 
 # Set default namespace to mpi-operator for ease of use
 kubectl config set-context $(kubectl config current-context) --namespace=mpi-operator
-kubectl apply -f ../nfs/
-kubectl get svc
-echo "Adding MPIJob"
+#kubectl apply -f ../nfs/
+#kubectl get svc
+#echo "Adding MPIJob"
 #cp staging/mpijob.tf .
 #terraform apply --auto-approve
 
